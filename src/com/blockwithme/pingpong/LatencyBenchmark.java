@@ -59,20 +59,19 @@ public class LatencyBenchmark extends AbstractBenchmark {
         pinger.hammer(ponger, MESSAGES);
     }
 
-//
-//    @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
-//    @Test
-//    public void testAkkaBlocking() throws Exception {
-//        final ActorRef pinger = system.actorOf(new Props(
-//                AkkaBlockingPinger.class), "blockingPinger");
-//        final ActorRef ponger = system.actorOf(new Props(
-//                AkkaBlockingPonger.class), "blockingPonger");
-//
-//        final Timeout timeout = new Timeout(Duration.create(60, "seconds"));
-//        final Future<Object> future = Patterns.ask(pinger,
-//                AkkaBlockingPinger.hammer(ponger, MESSAGES), timeout);
-//        Await.result(future, timeout.duration());
-//    }
+    @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
+    @Test
+    public void testAkkaBlocking() throws Exception {
+        final ActorRef pinger = system.actorOf(new Props(
+                AkkaBlockingPinger.class), "blockingPinger");
+        final ActorRef ponger = system.actorOf(new Props(
+                AkkaBlockingPonger.class), "blockingPonger");
+
+        final Timeout timeout = new Timeout(Duration.create(60, "seconds"));
+        final Future<Object> future = Patterns.ask(pinger,
+                AkkaBlockingPinger.hammer(ponger, MESSAGES), timeout);
+        Await.result(future, timeout.duration());
+    }
 
     @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
     @Test
@@ -88,53 +87,53 @@ public class LatencyBenchmark extends AbstractBenchmark {
         Await.result(future, timeout.duration());
     }
 
-//    @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
-//    @Test
-//    public void testJActorBlocking() throws Exception {
-//        final JActorBlockingPinger pinger = new JActorBlockingPinger(
-//                jaMailboxFactory.createMailbox());
-//        final JActorBlockingPonger ponger = new JActorBlockingPonger(
-//                jaMailboxFactory.createMailbox());
-//        pinger.hammer(ponger, MESSAGES);
-//    }
-//
-//    @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
-//    @Test
-//    public void testJActorIterator() throws Exception {
-//        final JActorIteratorPinger pinger = new JActorIteratorPinger(
-//                jaMailboxFactory.createMailbox());
-//        final JActorIteratorPonger ponger = new JActorIteratorPonger(
-//                pinger.getMailbox());
-//        pinger.hammer(ponger, MESSAGES);
-//    }
-//
-//    @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
-//    @Test
-//    public void testJActorStackOverflow() throws Exception {
-//        final JActorStackOverflowPinger pinger = new JActorStackOverflowPinger(
-//                jaMailboxFactory.createMailbox());
-//        final JActorStackOverflowPonger ponger = new JActorStackOverflowPonger(
-//                jaMailboxFactory.createMailbox());
-//        pinger.hammer(ponger, MESSAGES);
-//    }
-//
-//    @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
-//    @Test
-//    public void testPActorBlocking() throws Exception {
-//        final PActorBlockingPinger pinger = new PActorBlockingPinger(
-//                paMailboxFactory.createMailbox());
-//        final PActorBlockingPonger ponger = new PActorBlockingPonger(
-//                paMailboxFactory.createMailbox());
-//        pinger.hammer(ponger, MESSAGES);
-//    }
-//
-//    @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
-//    @Test
-//    public void testPActorNonBlocking() throws Exception {
-//        final PActorNonBlockingPinger pinger = new PActorNonBlockingPinger(
-//                paMailboxFactory.createMailbox());
-//        final PActorNonBlockingPonger ponger = new PActorNonBlockingPonger(
-//                paMailboxFactory.createMailbox());
-//        pinger.hammer(ponger, MESSAGES);
-//    }
+    @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
+    @Test
+    public void testJActorBlocking() throws Exception {
+        final JActorBlockingPinger pinger = new JActorBlockingPinger(
+                jaMailboxFactory.createMailbox());
+        final JActorBlockingPonger ponger = new JActorBlockingPonger(
+                jaMailboxFactory.createMailbox());
+        pinger.hammer(ponger, MESSAGES);
+    }
+
+    @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
+    @Test
+    public void testJActorIterator() throws Exception {
+        final JActorIteratorPinger pinger = new JActorIteratorPinger(
+                jaMailboxFactory.createMailbox());
+        final JActorIteratorPonger ponger = new JActorIteratorPonger(
+                pinger.getMailbox());
+        pinger.hammer(ponger, MESSAGES);
+    }
+
+    @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
+    @Test
+    public void testJActorStackOverflow() throws Exception {
+        final JActorStackOverflowPinger pinger = new JActorStackOverflowPinger(
+                jaMailboxFactory.createMailbox());
+        final JActorStackOverflowPonger ponger = new JActorStackOverflowPonger(
+                jaMailboxFactory.createMailbox());
+        pinger.hammer(ponger, MESSAGES);
+    }
+
+    @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
+    @Test
+    public void testPActorBlocking() throws Exception {
+        final PActorBlockingPinger pinger = new PActorBlockingPinger(
+                paMailboxFactory.createMailbox());
+        final PActorBlockingPonger ponger = new PActorBlockingPonger(
+                paMailboxFactory.createMailbox());
+        pinger.hammer(ponger, MESSAGES);
+    }
+
+    @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
+    @Test
+    public void testPActorNonBlocking() throws Exception {
+        final PActorNonBlockingPinger pinger = new PActorNonBlockingPinger(
+                paMailboxFactory.createMailbox());
+        final PActorNonBlockingPonger ponger = new PActorNonBlockingPonger(
+                paMailboxFactory.createMailbox());
+        pinger.hammer(ponger, MESSAGES);
+    }
 }
