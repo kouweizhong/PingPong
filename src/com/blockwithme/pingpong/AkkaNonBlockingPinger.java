@@ -1,11 +1,27 @@
+/*
+ * Copyright (C) 2013 Sebastien Diot.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.blockwithme.pingpong;
 
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
 
 /**
- * The Pinger's job is to hammer the Ponger with ping() request,
- * to count how many can be done in one second.
+ * The Pinger's job is to hammer the Ponger with ping() request.
+ * Implemented in Akka, by having the processing of the responses cause the new
+ * request, therefore not requiring blocking.
  */
 public class AkkaNonBlockingPinger extends UntypedActor {
     /** A Hammer request, targeted at Pinger. */
@@ -30,6 +46,7 @@ public class AkkaNonBlockingPinger extends UntypedActor {
             pinger.ponger = ponger;
             pinger.requester = sender;
             final ActorRef pingerRef = pinger.getSelf();
+            // Sends the first ping, to start the loop.
             AkkaNonBlockingPonger.ping(pingerRef, ponger);
         }
     }
@@ -46,7 +63,7 @@ public class AkkaNonBlockingPinger extends UntypedActor {
     /** The number of exchanges to do. */
     private int count;
 
-    /** Reacts to reply
+    /** Reacts to PongReply
      * @throws Exception */
     private void onReply(final AkkaNonBlockingPonger.PongReply reply)
             throws Exception {
@@ -58,15 +75,13 @@ public class AkkaNonBlockingPinger extends UntypedActor {
         }
     }
 
-    /** Tells the pinger to hammer the Ponger. Describes the speed in the result. */
+    /** Creates a HammerRequest, to hammer the Ponger. Does NOT send the request. */
     public static HammerRequest hammer(final ActorRef ponger, final int _count)
             throws Exception {
         return new HammerRequest(ponger, _count);
     }
 
-    /* (non-Javadoc)
-     * @see akka.actor.UntypedActor#onReceive(java.lang.Object)
-     */
+    /** Processes all incoming messages, including replies. */
     @Override
     public void onReceive(final Object msg) throws Exception {
         if (msg instanceof HammerRequest) {

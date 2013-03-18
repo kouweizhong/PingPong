@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2013 Sebastien Diot.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.blockwithme.pingpong;
 
 import org.agilewiki.pactor.Mailbox;
@@ -5,8 +20,8 @@ import org.agilewiki.pactor.Request;
 import org.agilewiki.pactor.ResponseProcessor;
 
 /**
- * The Pinger's job is to hammer the Ponger with ping() request,
- * to count how many can be done in one second.
+ * The Pinger's job is to hammer the Ponger with ping() request.
+ * This impl uses PActor, and generates request while processing reply, to eliminate blocking.
  */
 public class PActorNonBlockingPinger {
 
@@ -28,23 +43,25 @@ public class PActorNonBlockingPinger {
         private ResponseProcessor<String> responseProcessor;
 
         /** Creates a hammer request, with the targeted Ponger. */
-        public HammerRequest2(final Mailbox mbox, final PActorNonBlockingPonger _ponger,
-                final int _count) {
+        public HammerRequest2(final Mailbox mbox,
+                final PActorNonBlockingPonger _ponger, final int _count) {
             super(mbox);
             ponger = _ponger;
             count = _count;
         }
 
+        /** Send a ping, unless we're done, in which case tell caller we are done. */
         private void ping() throws Exception {
             done++;
             if (done < count) {
-                ponger.ping(PActorNonBlockingPinger.this, new ResponseProcessor<String>() {
-                    @Override
-                    public void processResponse(final String response)
-                            throws Exception {
-                        ping();
-                    }
-                });
+                ponger.ping(PActorNonBlockingPinger.this,
+                        new ResponseProcessor<String>() {
+                            @Override
+                            public void processResponse(final String response)
+                                    throws Exception {
+                                ping();
+                            }
+                        });
             } else {
                 responseProcessor.processResponse("done");
             }
@@ -57,6 +74,7 @@ public class PActorNonBlockingPinger {
                 throws Exception {
             done = 0;
             responseProcessor = _responseProcessor;
+            // Send first ping, to get the "virtual loop" going
             ping();
         }
     }
@@ -66,8 +84,9 @@ public class PActorNonBlockingPinger {
         mailbox = mbox;
     }
 
-    /** Tells the pinger to hammer the Ponger. Describes the speed in the result. */
-    public String hammer(final PActorNonBlockingPonger ponger, final int count) throws Exception {
+    /** Tells the pinger to hammer the Ponger. */
+    public String hammer(final PActorNonBlockingPonger ponger, final int count)
+            throws Exception {
         return new HammerRequest2(getMailbox(), ponger, count).pend();
     }
 

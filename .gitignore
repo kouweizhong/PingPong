@@ -12,3 +12,7 @@ bin
 conf
 META-INF
 /nbproject/private/
+
+benchmarks.h2.db
+benchmarks.lock.db
+charts

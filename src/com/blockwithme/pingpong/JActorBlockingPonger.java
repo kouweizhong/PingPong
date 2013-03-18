@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2013 Sebastien Diot.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.blockwithme.pingpong;
 
 import org.agilewiki.jactor.Actor;
@@ -9,15 +24,19 @@ import org.agilewiki.jactor.lpc.Request;
 
 /**
  * Receives Pings, and send Pongs back.
+ * Implemented with JActors. Blocks using JAFuture.
  */
 public class JActorBlockingPonger extends JLPCActor {
     /** Some mutable data of Ponger, which must be access in a thread-safe way. */
     private int pings;
 
     /** A Ping request, targeted at Ponger. */
-    private static class PingRequest extends Request<String,JActorBlockingPonger> {
+    private static class PingRequest extends
+            Request<String, JActorBlockingPonger> {
+        /** Just some state to use when processing requests. */
         private final String from;
 
+        /** Creates the Ping request. */
         public PingRequest(final String _from) {
             from = _from;
         }
@@ -29,12 +48,12 @@ public class JActorBlockingPonger extends JLPCActor {
                 @SuppressWarnings("rawtypes") final RP responseProcessor)
                 throws Exception {
             final JActorBlockingPonger ponger = (JActorBlockingPonger) targetActor;
-            responseProcessor.processResponse("Pong " + (ponger.pings++) + " to "
-                    + from + "!");
+            responseProcessor.processResponse("Pong " + (ponger.pings++)
+                    + " to " + from + "!");
         }
 
         @Override
-        public boolean isTargetType(Actor targetActor) {
+        public boolean isTargetType(final Actor targetActor) {
             return JActorBlockingPonger.class.isInstance(targetActor);
         }
     }
