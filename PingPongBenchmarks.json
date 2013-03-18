@@ -1,0 +1,26 @@
+{
+"cols": [
+{"label": "method", "type": "string"},
+{"label": "Average time [s]", "type": "number"},
+{"label": "StdDev", "type": "number"},
+{"label": "GC time [s]", "type": "number"},
+{"label": "GC average [s]", "type": "number"},
+{"label": "StdDev", "type": "number"},
+{"label": "GC calls", "type": "number"},
+{"label": "benchmark rounds", "type": "number"},
+{"label": "warmup rounds", "type": "number"},
+{"label": "Total benchmark time", "type": "number"},
+{"label": "Total warmup time", "type": "number"}
+],
+"rows": [
+{"c": [{"v": "testDirect"}, {"v": 0.14}, {"v": 0.03}, {"v": 0.02}, {"v": 0.0}, {"v": 0.0}, {"v": 4}, {"v": 10}, {"v": 3}, {"v": 1.38}, {"v": 1.17}]},
+{"c": [{"v": "testExecutorService"}, {"v": 5.69}, {"v": 1.2}, {"v": 0.05}, {"v": 0.0}, {"v": 0.0}, {"v": 28}, {"v": 10}, {"v": 3}, {"v": 56.86}, {"v": 14.27}]},
+{"c": [{"v": "testThreadWithBlockingQueue"}, {"v": 10.26}, {"v": 3.22}, {"v": 0.21}, {"v": 0.0}, {"v": 0.0}, {"v": 305}, {"v": 10}, {"v": 3}, {"v": 102.58}, {"v": 25.89}]},
+{"c": [{"v": "testAkkaBlocking"}, {"v": 19.15}, {"v": 0.42}, {"v": 2.5}, {"v": 0.0}, {"v": 0.0}, {"v": 56}, {"v": 10}, {"v": 3}, {"v": 191.55}, {"v": 58.31}]},
+{"c": [{"v": "testAkkaNonBlocking"}, {"v": 13.59}, {"v": 1.74}, {"v": 0.81}, {"v": 0.0}, {"v": 0.0}, {"v": 174}, {"v": 10}, {"v": 3}, {"v": 135.94}, {"v": 51.55}]},
+{"c": [{"v": "testJActorBlocking"}, {"v": 8.9}, {"v": 2.94}, {"v": 0.46}, {"v": 0.0}, {"v": 0.0}, {"v": 92}, {"v": 10}, {"v": 3}, {"v": 88.99}, {"v": 34.01}]},
+{"c": [{"v": "testJActorIterator"}, {"v": 0.57}, {"v": 0.02}, {"v": 0.07}, {"v": 0.0}, {"v": 0.0}, {"v": 13}, {"v": 10}, {"v": 3}, {"v": 5.75}, {"v": 2.29}]},
+{"c": [{"v": "testJActorStackOverflow"}, {"v": 1.02}, {"v": 0.01}, {"v": 0.1}, {"v": 0.0}, {"v": 0.0}, {"v": 14}, {"v": 10}, {"v": 3}, {"v": 10.15}, {"v": 3.35}]},
+{"c": [{"v": "testPActorBlocking"}, {"v": 13.01}, {"v": 0.24}, {"v": 0.12}, {"v": 0.0}, {"v": 0.0}, {"v": 23}, {"v": 10}, {"v": 3}, {"v": 130.1}, {"v": 40.23}]},
+{"c": [{"v": "testPActorNonBlocking"}, {"v": 13.52}, {"v": 0.51}, {"v": 0.95}, {"v": 0.0}, {"v": 0.0}, {"v": 201}, {"v": 10}, {"v": 3}, {"v": 135.22}, {"v": 41.85}]}
+]}
