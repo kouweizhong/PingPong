@@ -11,9 +11,12 @@ In particular, we would like submissions for:
 
 * http://www.malhar.net/sriram/kilim/
 * http://code.google.com/p/jetlang/
-* http://code.google.com/p/korus/
 
-And we would accept submissions for other actor frameworks, that we do not know about.
+And we would accept submissions for other actor frameworks, that we do not know about (assuming they are still actively mainained).
+
+For Kilim and JetLang, this link with some other benchmarks could be a start:
+
+http://sujitpal.blogspot.in/2009/01/more-java-actor-frameworks-compared.html
 
 Current results, on my aging Intel Xeon X3360 @2.83 GHz, with 800 MHz RAM, PC, can be seen here:
 
