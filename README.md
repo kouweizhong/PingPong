@@ -17,4 +17,4 @@ And we would accept submissions for other actor frameworks, that we do not know 
 
 Current results, on my aging Intel Xeon X3360 @2.83 GHz, with 800 MHz RAM, PC, can be seen here:
 
-http://htmlpreview.github.com/?https://github.com/skunkiferous/PingPong/tree/master/results/PingPongBenchmarks.html
+http://htmlpreview.github.com/?https://raw.github.com/skunkiferous/PingPong/master/results/PingPongBenchmarks.html
