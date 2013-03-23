@@ -16,7 +16,7 @@
 package com.blockwithme.pingpong;
 
 import org.agilewiki.pactor.Mailbox;
-import org.agilewiki.pactor.Request;
+import org.agilewiki.pactor.RequestBase;
 import org.agilewiki.pactor.ResponseProcessor;
 
 /**
@@ -33,7 +33,7 @@ public class PActorNonBlockingPonger {
     private int pings;
 
     /** A Ping request, targeted at Ponger. */
-    private class PingRequest extends Request<String> {
+    private class PingRequest extends RequestBase<String> {
         /** SOme state needed to process the request. */
         private final String from;
 

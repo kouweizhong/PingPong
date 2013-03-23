@@ -16,7 +16,7 @@
 package com.blockwithme.pingpong;
 
 import org.agilewiki.pactor.Mailbox;
-import org.agilewiki.pactor.Request;
+import org.agilewiki.pactor.RequestBase;
 import org.agilewiki.pactor.ResponseProcessor;
 
 /**
@@ -28,7 +28,7 @@ public class PActorBlockingPinger {
     private final Mailbox mailbox;
 
     /** A Hammer request, targeted at Pinger. */
-    private class HammerRequest extends Request<String> {
+    private class HammerRequest extends RequestBase<String> {
         /** The Ponger to hammer. */
         private final PActorBlockingPonger ponger;
 

@@ -223,7 +223,7 @@ public class LatencyBenchmark extends AbstractBenchmark {
         final PActorNonBlockingPinger pinger = new PActorNonBlockingPinger(
                 paMailboxFactory.createMailbox());
         final PActorNonBlockingPonger ponger = new PActorNonBlockingPonger(
-                paMailboxFactory.createMailbox());
+                pinger.getMailbox());
         pinger.hammer(ponger, MESSAGES);
     }
 }
