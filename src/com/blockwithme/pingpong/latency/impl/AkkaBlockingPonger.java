@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blockwithme.pingpong;
+package com.blockwithme.pingpong.latency.impl;
 
 import scala.concurrent.Await;
 import scala.concurrent.Future;
@@ -33,11 +33,17 @@ public class AkkaBlockingPonger extends UntypedActor {
 
     /** A Ping request, targeted at Ponger. */
     private static class PingRequest {
+        public final int input;
+
+        public PingRequest(final int _input) {
+            input = _input;
+        }
+
         /** Processes the ping(String) request, from within the Thread of the Ponger. */
         public void processRequest(final AkkaBlockingPonger ponger,
                 final ActorRef sender) throws Exception {
-            sender.tell("Pong " + (ponger.pings++) + " to " + sender + "!",
-                    ponger.getSelf());
+            ponger.pings++;
+            sender.tell(input + 1, ponger.getSelf());
         }
     }
 
@@ -52,12 +58,12 @@ public class AkkaBlockingPonger extends UntypedActor {
         }
     }
 
-    /** Sends a ping(String) request to the Ponger. Blocks and returns response. */
-    public static String ping(final ActorRef pinger, final ActorRef ponger)
-            throws Exception {
+    /** Sends a ping(int) request to the Ponger. Blocks and returns response. */
+    public static Integer ping(final ActorRef pinger, final ActorRef ponger,
+            final int input) throws Exception {
         final Timeout timeout = new Timeout(Duration.create(60, "seconds"));
-        final Future<Object> future = Patterns.ask(ponger, new PingRequest(),
-                timeout);
-        return (String) Await.result(future, timeout.duration());
+        final Future<Object> future = Patterns.ask(ponger, new PingRequest(
+                input), timeout);
+        return (Integer) Await.result(future, timeout.duration());
     }
 }

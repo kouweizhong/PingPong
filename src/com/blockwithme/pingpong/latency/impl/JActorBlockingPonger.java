@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blockwithme.pingpong;
+package com.blockwithme.pingpong.latency.impl;
 
 import org.agilewiki.jactor.Actor;
+import org.agilewiki.jactor.JAFuture;
 import org.agilewiki.jactor.Mailbox;
 import org.agilewiki.jactor.RP;
 import org.agilewiki.jactor.lpc.JLPCActor;
@@ -23,21 +24,21 @@ import org.agilewiki.jactor.lpc.Request;
 
 /**
  * Receives Pings, and send Pongs back.
- * Implemented in JActor using a simplistic impl, which causes occasional Stack-Overflow!
+ * Implemented with JActors. Blocks using JAFuture.
  */
-public class JActorStackOverflowPonger extends JLPCActor {
+public class JActorBlockingPonger extends JLPCActor {
     /** Some mutable data of Ponger, which must be access in a thread-safe way. */
     private int pings;
 
     /** A Ping request, targeted at Ponger. */
-    private static class PingRequest2 extends
-            Request<String, JActorStackOverflowPonger> {
-        /** Some state needed to process the ping request. */
-        private final String from;
+    private static class PingRequest extends
+            Request<Integer, JActorBlockingPonger> {
+        /** Just some state to use when processing requests. */
+        private final int input;
 
-        /** Creates a ping request */
-        public PingRequest2(final String _from) {
-            from = _from;
+        /** Creates the Ping request. */
+        public PingRequest(final int _input) {
+            input = _input;
         }
 
         /** Processes the ping(String) request, from within the Thread of the Ponger. */
@@ -46,26 +47,26 @@ public class JActorStackOverflowPonger extends JLPCActor {
         public void processRequest(final JLPCActor targetActor,
                 @SuppressWarnings("rawtypes") final RP responseProcessor)
                 throws Exception {
-            final JActorStackOverflowPonger ponger = (JActorStackOverflowPonger) targetActor;
-            responseProcessor.processResponse("Pong " + (ponger.pings++)
-                    + " to " + from + "!");
+            final JActorBlockingPonger ponger = (JActorBlockingPonger) targetActor;
+            ponger.pings++;
+            responseProcessor.processResponse(input + 1);
         }
 
         @Override
         public boolean isTargetType(final Actor targetActor) {
-            return JActorStackOverflowPonger.class.isInstance(targetActor);
+            return JActorBlockingPonger.class.isInstance(targetActor);
         }
     }
 
     /** Creates a Ponger, with it's own mailbox.
      * @throws Exception */
-    public JActorStackOverflowPonger(final Mailbox mbox) throws Exception {
+    public JActorBlockingPonger(final Mailbox mbox) throws Exception {
         initialize(mbox);
     }
 
-    /** Sends a ping(String) request to the Ponger. */
-    public void ping(final JActorStackOverflowPinger pinger, final RP<String> rp)
-            throws Exception {
-        new PingRequest2(pinger.toString()).send(pinger, this, rp);
+    /** Sends a ping(String) request to the Ponger. Blocks and returns response. */
+    public Integer ping(final int _input) throws Exception {
+        final JAFuture future = new JAFuture();
+        return new PingRequest(_input).send(future, this);
     }
 }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blockwithme.pingpong;
+package com.blockwithme.pingpong.latency.impl;
 
 /**
  * Receives Pings, and send Pongs back.
@@ -26,22 +26,22 @@ public class DirectPonger {
     /** A Ping request, targeted at Ponger. */
     private static class PingRequest {
         /** Some data needed when processing a request. */
-        private final String from;
+        private final int input;
 
         /** Creates a Ping request. */
-        public PingRequest(final String _from) {
-            from = _from;
+        public PingRequest(final int _input) {
+            input = _input;
         }
 
-        /** Processes the ping(String) request. */
-        public String processRequest(final DirectPonger ponger)
-                throws Exception {
-            return "Pong " + (ponger.pings++) + " to " + from + "!";
+        /** Processes the ping(int) request. */
+        public int processRequest(final DirectPonger ponger) throws Exception {
+            ponger.pings++;
+            return input + 1;
         }
     }
 
-    /** Sends a ping(String) request to the Ponger. Blocks and returns response. */
-    public String ping(final String from) throws Exception {
-        return new PingRequest(from).processRequest(this);
+    /** Sends a ping(int) request to the Ponger. Blocks and returns response. */
+    public int ping(final int input) throws Exception {
+        return new PingRequest(input).processRequest(this);
     }
 }

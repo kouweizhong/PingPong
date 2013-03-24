@@ -1,4 +1,4 @@
-package com.blockwithme.pingpong;
+package com.blockwithme.pingpong.latency.impl;
 
 /**
  * Receives Pings, and send Pongs back.
@@ -24,35 +24,34 @@ public class ThreadWithBlockingQueuePonger extends ActorThreadWithBlockingQueue 
     /** Pong's reply */
     public static class PongReply {
         /** The reply. */
-        public final String pong;
+        public final int output;
 
         /** Creates the reply. */
-        public PongReply(final String _pong) {
-            pong = _pong;
+        public PongReply(final int _output) {
+            output = _output;
         }
     }
 
     /** A Ping request, targeted at Ponger. */
     private static class PingRequest {
         /** Some data used when processing the request. */
-        private final String from;
+        private final int input;
 
         /** Creates the ping request. */
-        public PingRequest(final String _from) {
-            from = _from;
+        public PingRequest(final int _input) {
+            input = _input;
         }
 
         /** Processes the ping(String) request, from within the Thread of the Ponger. */
         public PongReply processRequest(
                 final ThreadWithBlockingQueuePonger ponger) throws Exception {
-            return new PongReply("Pong " + (ponger.pings++) + " to " + from
-                    + "!");
+            return new PongReply(input + 1);
         }
     }
 
     /** Sends a ping(String) request to the Ponger. */
-    public void ping(final String from,
-            final ActorThreadWithBlockingQueue sender) throws Exception {
-        queueMessage(new PingRequest(from), sender);
+    public void ping(final int input, final ActorThreadWithBlockingQueue sender)
+            throws Exception {
+        queueMessage(new PingRequest(input), sender);
     }
 }

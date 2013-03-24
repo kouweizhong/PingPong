@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blockwithme.pingpong;
+package com.blockwithme.pingpong.latency;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -34,14 +34,36 @@ import akka.actor.Props;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
 
+import com.blockwithme.pingpong.latency.impl.AkkaBlockingPinger;
+import com.blockwithme.pingpong.latency.impl.AkkaBlockingPonger;
+import com.blockwithme.pingpong.latency.impl.AkkaNonBlockingPinger;
+import com.blockwithme.pingpong.latency.impl.AkkaNonBlockingPonger;
+import com.blockwithme.pingpong.latency.impl.DirectPinger;
+import com.blockwithme.pingpong.latency.impl.DirectPonger;
+import com.blockwithme.pingpong.latency.impl.ExecutorServicePinger;
+import com.blockwithme.pingpong.latency.impl.ExecutorServicePonger;
+import com.blockwithme.pingpong.latency.impl.JActorBlockingPinger;
+import com.blockwithme.pingpong.latency.impl.JActorBlockingPonger;
+import com.blockwithme.pingpong.latency.impl.JActorIteratorPinger;
+import com.blockwithme.pingpong.latency.impl.JActorIteratorPonger;
+import com.blockwithme.pingpong.latency.impl.JActorStackOverflowPinger;
+import com.blockwithme.pingpong.latency.impl.JActorStackOverflowPonger;
+import com.blockwithme.pingpong.latency.impl.PActorBlockingPinger;
+import com.blockwithme.pingpong.latency.impl.PActorBlockingPonger;
+import com.blockwithme.pingpong.latency.impl.PActorNonBlockingPinger;
+import com.blockwithme.pingpong.latency.impl.PActorNonBlockingPonger;
+import com.blockwithme.pingpong.latency.impl.ThreadWithBlockingQueuePinger;
+import com.blockwithme.pingpong.latency.impl.ThreadWithBlockingQueuePonger;
 import com.carrotsearch.junitbenchmarks.AbstractBenchmark;
 import com.carrotsearch.junitbenchmarks.BenchmarkOptions;
 import com.carrotsearch.junitbenchmarks.annotation.AxisRange;
 import com.carrotsearch.junitbenchmarks.annotation.BenchmarkMethodChart;
 
 /**
- * Tests the number of request/reply cycles per second,
+ * Tests the number of seconds required to do sequential request/reply cycles,
  * for different possible Actor implementations.
+ *
+ * It is in essence a latency test, not a throughput test.
  */
 @AxisRange(min = 0, max = 3)
 @BenchmarkMethodChart(filePrefix = "PingPongBenchmarks")
@@ -105,7 +127,11 @@ public class LatencyBenchmark extends AbstractBenchmark {
     public void testDirect() throws Exception {
         final DirectPinger pinger = new DirectPinger();
         final DirectPonger ponger = new DirectPonger();
-        pinger.hammer(ponger, MESSAGES);
+        final int result = pinger.hammer(ponger, MESSAGES);
+        if (result != MESSAGES) {
+            throw new IllegalStateException("Expected " + MESSAGES
+                    + " but got " + result);
+        }
     }
 
     /** Tests using an ExecutorService. */
@@ -118,7 +144,11 @@ public class LatencyBenchmark extends AbstractBenchmark {
                 executorService);
         try {
             try {
-                pinger.hammer(ponger, MESSAGES);
+                final Integer result = pinger.hammer(ponger, MESSAGES);
+                if (result != MESSAGES) {
+                    throw new IllegalStateException("Expected " + MESSAGES
+                            + " but got " + result);
+                }
             } finally {
                 ponger.kill();
             }
@@ -137,7 +167,11 @@ public class LatencyBenchmark extends AbstractBenchmark {
         try {
             ponger.start();
             try {
-                pinger.hammer(ponger, MESSAGES);
+                final Integer result = pinger.hammer(ponger, MESSAGES);
+                if (result != MESSAGES) {
+                    throw new IllegalStateException("Expected " + MESSAGES
+                            + " but got " + result);
+                }
             } finally {
                 ponger.kill();
             }
@@ -158,7 +192,12 @@ public class LatencyBenchmark extends AbstractBenchmark {
         final Timeout timeout = new Timeout(Duration.create(60, "seconds"));
         final Future<Object> future = Patterns.ask(pinger,
                 AkkaBlockingPinger.hammer(ponger, MESSAGES), timeout);
-        Await.result(future, timeout.duration());
+        final Integer result = (Integer) Await.result(future,
+                timeout.duration());
+        if (result.intValue() != MESSAGES) {
+            throw new IllegalStateException("Expected " + MESSAGES
+                    + " but got " + result);
+        }
     }
 
     /** Test in Akka, by having a reply generate the next request, to eliminate blocking. */
@@ -173,7 +212,12 @@ public class LatencyBenchmark extends AbstractBenchmark {
         final Timeout timeout = new Timeout(Duration.create(60, "seconds"));
         final Future<Object> future = Patterns.ask(pinger,
                 AkkaNonBlockingPinger.hammer(ponger, MESSAGES), timeout);
-        Await.result(future, timeout.duration());
+        final Integer result = (Integer) Await.result(future,
+                timeout.duration());
+        if (result.intValue() != MESSAGES) {
+            throw new IllegalStateException("Expected " + MESSAGES
+                    + " but got " + result);
+        }
     }
 
     /** Test in JActors, using blocking Futures. */
@@ -184,7 +228,11 @@ public class LatencyBenchmark extends AbstractBenchmark {
                 jaMailboxFactory.createMailbox());
         final JActorBlockingPonger ponger = new JActorBlockingPonger(
                 jaMailboxFactory.createMailbox());
-        pinger.hammer(ponger, MESSAGES);
+        final Integer result = pinger.hammer(ponger, MESSAGES);
+        if (result.intValue() != MESSAGES) {
+            throw new IllegalStateException("Expected " + MESSAGES
+                    + " but got " + result);
+        }
     }
 
     /** Test in JActors, using the Iterator helper class. */
@@ -195,7 +243,11 @@ public class LatencyBenchmark extends AbstractBenchmark {
                 jaMailboxFactory.createMailbox());
         final JActorIteratorPonger ponger = new JActorIteratorPonger(
                 pinger.getMailbox());
-        pinger.hammer(ponger, MESSAGES);
+        final Integer result = pinger.hammer(ponger, MESSAGES);
+        if (result.intValue() != MESSAGES) {
+            throw new IllegalStateException("Expected " + MESSAGES
+                    + " but got " + result);
+        }
     }
 
     /** Test non-blocking JActor simplistic impl, which causes occasional Stack-Overflow! */
@@ -206,7 +258,11 @@ public class LatencyBenchmark extends AbstractBenchmark {
                 jaMailboxFactory.createMailbox());
         final JActorStackOverflowPonger ponger = new JActorStackOverflowPonger(
                 jaMailboxFactory.createMailbox());
-        pinger.hammer(ponger, MESSAGES);
+        final Integer result = pinger.hammer(ponger, MESSAGES);
+        if (result.intValue() != MESSAGES) {
+            throw new IllegalStateException("Expected " + MESSAGES
+                    + " but got " + result);
+        }
     }
 
     /** Test with PActors, using the pend() method to block. */
@@ -217,7 +273,11 @@ public class LatencyBenchmark extends AbstractBenchmark {
                 paMailboxFactory.createMailbox());
         final PActorBlockingPonger ponger = new PActorBlockingPonger(
                 paMailboxFactory.createMailbox());
-        pinger.hammer(ponger, MESSAGES);
+        final Integer result = pinger.hammer(ponger, MESSAGES);
+        if (result.intValue() != MESSAGES) {
+            throw new IllegalStateException("Expected " + MESSAGES
+                    + " but got " + result);
+        }
     }
 
     /** Test with PActors, by having a reply generate the next request, to eliminate blocking. */
@@ -228,6 +288,10 @@ public class LatencyBenchmark extends AbstractBenchmark {
                 paMailboxFactory.createMailbox());
         final PActorNonBlockingPonger ponger = new PActorNonBlockingPonger(
                 pinger.getMailbox());
-        pinger.hammer(ponger, MESSAGES);
+        final Integer result = pinger.hammer(ponger, MESSAGES);
+        if (result.intValue() != MESSAGES) {
+            throw new IllegalStateException("Expected " + MESSAGES
+                    + " but got " + result);
+        }
     }
 }

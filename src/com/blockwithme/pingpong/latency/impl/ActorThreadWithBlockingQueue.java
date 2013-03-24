@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blockwithme.pingpong;
+package com.blockwithme.pingpong.latency.impl;
 
 import java.util.concurrent.ArrayBlockingQueue;
 

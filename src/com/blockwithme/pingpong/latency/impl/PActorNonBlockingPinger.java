@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blockwithme.pingpong;
+package com.blockwithme.pingpong.latency.impl;
 
 import org.agilewiki.pactor.Mailbox;
 import org.agilewiki.pactor.RequestBase;
@@ -29,7 +29,7 @@ public class PActorNonBlockingPinger {
     private final Mailbox mailbox;
 
     /** A Hammer request, targeted at Pinger. */
-    private class HammerRequest2 extends RequestBase<String> {
+    private class HammerRequest extends RequestBase<Integer> {
         /** The Ponger to hammer. */
         private final PActorNonBlockingPonger ponger;
 
@@ -40,10 +40,10 @@ public class PActorNonBlockingPinger {
         private int done;
 
         /** ResponseProcessor for benchmark results */
-        private ResponseProcessor<String> responseProcessor;
+        private ResponseProcessor<Integer> responseProcessor;
 
         /** Creates a hammer request, with the targeted Ponger. */
-        public HammerRequest2(final Mailbox mbox,
+        public HammerRequest(final Mailbox mbox,
                 final PActorNonBlockingPonger _ponger, final int _count) {
             super(mbox);
             ponger = _ponger;
@@ -55,22 +55,26 @@ public class PActorNonBlockingPinger {
             done++;
             if (done < count) {
                 ponger.ping(PActorNonBlockingPinger.this,
-                        new ResponseProcessor<String>() {
+                        new ResponseProcessor<Integer>() {
                             @Override
-                            public void processResponse(final String response)
+                            public void processResponse(final Integer response)
                                     throws Exception {
+                                if (response.intValue() != done + 1) {
+                                    throw new IllegalStateException("Expected "
+                                            + done + " but got " + response);
+                                }
                                 ping();
                             }
-                        });
+                        }, done);
             } else {
-                responseProcessor.processResponse("done");
+                responseProcessor.processResponse(done);
             }
         }
 
         /** Process the hammer request. */
         @Override
         public void processRequest(
-                final ResponseProcessor<String> _responseProcessor)
+                final ResponseProcessor<Integer> _responseProcessor)
                 throws Exception {
             done = 0;
             responseProcessor = _responseProcessor;
@@ -85,9 +89,9 @@ public class PActorNonBlockingPinger {
     }
 
     /** Tells the pinger to hammer the Ponger. */
-    public String hammer(final PActorNonBlockingPonger ponger, final int count)
+    public Integer hammer(final PActorNonBlockingPonger ponger, final int count)
             throws Exception {
-        return new HammerRequest2(getMailbox(), ponger, count).pend();
+        return new HammerRequest(getMailbox(), ponger, count).pend();
     }
 
     /**

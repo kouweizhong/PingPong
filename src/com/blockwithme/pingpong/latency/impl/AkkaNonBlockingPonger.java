@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blockwithme.pingpong;
+package com.blockwithme.pingpong.latency.impl;
 
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
@@ -29,22 +29,28 @@ public class AkkaNonBlockingPonger extends UntypedActor {
 
     /** A Ping request, targeted at Ponger. */
     private static class PingRequest {
+        public final int input;
+
+        public PingRequest(final int _input) {
+            input = _input;
+        }
+
         /** Processes the ping(String) request, from within the Thread of the Ponger. */
         public void processRequest(final AkkaNonBlockingPonger ponger,
                 final ActorRef sender) throws Exception {
-            sender.tell(new PongReply("Pong " + (ponger.pings++) + " to "
-                    + sender + "!"), ponger.getSelf());
+            ponger.pings++;
+            sender.tell(new PongReply(input + 1), ponger.getSelf());
         }
     }
 
     /** Pong's reply */
     public static class PongReply {
         /** the reply. */
-        public final String pong;
+        public final int output;
 
         /** Creates a Pong reply. */
-        public PongReply(final String _pong) {
-            pong = _pong;
+        public PongReply(final int _output) {
+            output = _output;
         }
     }
 
@@ -60,8 +66,8 @@ public class AkkaNonBlockingPonger extends UntypedActor {
     }
 
     /** Sends a ping(String) request to the Ponger. */
-    public static void ping(final ActorRef pinger, final ActorRef ponger)
-            throws Exception {
-        ponger.tell(new PingRequest(), pinger);
+    public static void ping(final ActorRef pinger, final ActorRef ponger,
+            final int _input) throws Exception {
+        ponger.tell(new PingRequest(_input), pinger);
     }
 }

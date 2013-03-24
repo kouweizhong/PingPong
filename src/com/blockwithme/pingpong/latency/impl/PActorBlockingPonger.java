@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blockwithme.pingpong;
+package com.blockwithme.pingpong.latency.impl;
 
 import org.agilewiki.pactor.Mailbox;
 import org.agilewiki.pactor.RequestBase;
@@ -31,21 +31,21 @@ public class PActorBlockingPonger {
     private int pings;
 
     /** A Ping request, targeted at Ponger. */
-    private class PingRequest extends RequestBase<String> {
-        private final String from;
+    private class PingRequest extends RequestBase<Integer> {
+        private final int input;
 
-        public PingRequest(final Mailbox mbox, final String _from) {
+        public PingRequest(final Mailbox mbox, final int _input) {
             super(mbox);
-            from = _from;
+            input = _input;
         }
 
         /** Processes the ping(String) request, from within the Thread of the Ponger. */
         @Override
         public void processRequest(
-                final ResponseProcessor<String> responseProcessor)
+                final ResponseProcessor<Integer> responseProcessor)
                 throws Exception {
-            responseProcessor.processResponse("Pong " + (pings++) + " to "
-                    + from + "!");
+            pings++;
+            responseProcessor.processResponse(input + 1);
         }
     }
 
@@ -55,7 +55,7 @@ public class PActorBlockingPonger {
     }
 
     /** Sends a ping(String) request to the Ponger. Blocks and returns response. */
-    public String ping(final String from) throws Exception {
-        return new PingRequest(mailbox, from).pend();
+    public Integer ping(final int input) throws Exception {
+        return new PingRequest(mailbox, input).pend();
     }
 }

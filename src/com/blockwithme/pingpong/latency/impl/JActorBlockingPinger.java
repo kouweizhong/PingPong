@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blockwithme.pingpong;
+package com.blockwithme.pingpong.latency.impl;
 
 import org.agilewiki.jactor.Actor;
 import org.agilewiki.jactor.JAFuture;
@@ -29,7 +29,7 @@ import org.agilewiki.jactor.lpc.Request;
 public class JActorBlockingPinger extends JLPCActor {
     /** A Hammer request, targeted at Pinger. */
     private static class HammerRequest extends
-            Request<String, JActorBlockingPinger> {
+            Request<Integer, JActorBlockingPinger> {
         /** The Ponger to hammer. */
         private final JActorBlockingPonger ponger;
 
@@ -50,13 +50,16 @@ public class JActorBlockingPinger extends JLPCActor {
                 @SuppressWarnings("rawtypes") final RP responseProcessor)
                 throws Exception {
             final JActorBlockingPinger pinger = (JActorBlockingPinger) targetActor;
-            final String name = pinger.toString();
             int done = 0;
             while (done < count) {
-                ponger.ping(name);
+                final Integer response = ponger.ping(done);
                 done++;
+                if (response.intValue() != done) {
+                    throw new IllegalStateException("Expected " + done
+                            + " but got " + response);
+                }
             }
-            responseProcessor.processResponse("done");
+            responseProcessor.processResponse(done);
         }
 
         @Override
@@ -72,7 +75,7 @@ public class JActorBlockingPinger extends JLPCActor {
     }
 
     /** Tells the pinger to hammer the Ponger. Blocks and returns the result. */
-    public String hammer(final JActorBlockingPonger ponger, final int _count)
+    public Integer hammer(final JActorBlockingPonger ponger, final int _count)
             throws Exception {
         final JAFuture future = new JAFuture();
         return new HammerRequest(ponger, _count).send(future, this);

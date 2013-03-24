@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blockwithme.pingpong;
+package com.blockwithme.pingpong.latency.impl;
 
 import org.agilewiki.pactor.Mailbox;
 import org.agilewiki.pactor.RequestBase;
@@ -28,7 +28,7 @@ public class PActorBlockingPinger {
     private final Mailbox mailbox;
 
     /** A Hammer request, targeted at Pinger. */
-    private class HammerRequest extends RequestBase<String> {
+    private class HammerRequest extends RequestBase<Integer> {
         /** The Ponger to hammer. */
         private final PActorBlockingPonger ponger;
 
@@ -46,15 +46,18 @@ public class PActorBlockingPinger {
         /** Process the hammer request. */
         @Override
         public void processRequest(
-                final ResponseProcessor<String> responseProcessor)
+                final ResponseProcessor<Integer> responseProcessor)
                 throws Exception {
-            final String name = PActorBlockingPinger.this.toString();
             int done = 0;
             while (done < count) {
-                ponger.ping(name);
+                final Integer response = ponger.ping(done);
                 done++;
+                if (response.intValue() != done) {
+                    throw new IllegalStateException("Expected " + done
+                            + " but got " + response);
+                }
             }
-            responseProcessor.processResponse("done");
+            responseProcessor.processResponse(done);
         }
     }
 
@@ -64,7 +67,7 @@ public class PActorBlockingPinger {
     }
 
     /** Tells the pinger to hammer the Ponger. */
-    public String hammer(final PActorBlockingPonger ponger, final int count)
+    public Integer hammer(final PActorBlockingPonger ponger, final int count)
             throws Exception {
         return new HammerRequest(mailbox, ponger, count).pend();
     }

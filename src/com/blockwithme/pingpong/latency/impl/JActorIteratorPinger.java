@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blockwithme.pingpong;
+package com.blockwithme.pingpong.latency.impl;
 
 import org.agilewiki.jactor.Actor;
 import org.agilewiki.jactor.JABidiIterator;
@@ -30,7 +30,7 @@ import org.agilewiki.jactor.lpc.Request;
 public class JActorIteratorPinger extends JLPCActor {
     /** A Hammer request, targeted at Pinger. */
     private static class HammerRequest extends
-            Request<String, JActorIteratorPinger> {
+            Request<Integer, JActorIteratorPinger> {
         /** The Ponger to hammer. */
         private final JActorIteratorPonger ponger;
 
@@ -67,7 +67,7 @@ public class JActorIteratorPinger extends JLPCActor {
                 protected void sendRequest(
                         @SuppressWarnings("rawtypes") final RP responseProcessor)
                         throws Exception {
-                    ponger.ping(pinger, responseProcessor);
+                    ponger.ping(pinger, responseProcessor, done);
                 }
 
                 /**
@@ -79,13 +79,16 @@ public class JActorIteratorPinger extends JLPCActor {
                 @Override
                 protected Object processResponse(final Object response)
                         throws Exception {
-                    // response is ignored in this case, but we *could* have used it,
-                    // which is the main thing.
+                    final Integer cnt = (Integer) response;
                     done++;
+                    if (cnt.intValue() != done) {
+                        throw new IllegalStateException("Expected " + done
+                                + " but got " + response);
+                    }
                     if (done < count) {
                         return null;
                     } else {
-                        return "done";
+                        return done;
                     }
                 }
             }).iterate(_responseProcessor);
@@ -104,7 +107,7 @@ public class JActorIteratorPinger extends JLPCActor {
     }
 
     /** Tells the pinger to hammer the Ponger. Blocks and returns result. */
-    public String hammer(final JActorIteratorPonger ponger, final int _count)
+    public Integer hammer(final JActorIteratorPonger ponger, final int _count)
             throws Exception {
         final JAFuture future = new JAFuture();
         return new HammerRequest(ponger, _count).send(future, this);

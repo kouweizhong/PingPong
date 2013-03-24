@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blockwithme.pingpong;
+package com.blockwithme.pingpong.latency.impl;
 
 import org.agilewiki.jactor.Actor;
 import org.agilewiki.jactor.JAFuture;
@@ -28,8 +28,8 @@ import org.agilewiki.jactor.lpc.Request;
  */
 public class JActorStackOverflowPinger extends JLPCActor {
     /** A Hammer request, targeted at Pinger. */
-    private static class HammerRequest2 extends
-            Request<String, JActorStackOverflowPinger> {
+    private static class HammerRequest extends
+            Request<Integer, JActorStackOverflowPinger> {
         /** The Ponger to hammer. */
         private final JActorStackOverflowPonger ponger;
 
@@ -37,7 +37,7 @@ public class JActorStackOverflowPinger extends JLPCActor {
         private final int count;
 
         /** The responseProcessor from the test, to call when done. */
-        private RP<String> responseProcessor;
+        private RP<Integer> responseProcessor;
 
         /** The number of pings. */
         private int done;
@@ -46,7 +46,7 @@ public class JActorStackOverflowPinger extends JLPCActor {
         private JActorStackOverflowPinger pinger;
 
         /** Creates a hammer request, with the targeted Ponger. */
-        public HammerRequest2(final JActorStackOverflowPonger _ponger,
+        public HammerRequest(final JActorStackOverflowPonger _ponger,
                 final int _count) {
             ponger = _ponger;
             count = _count;
@@ -54,20 +54,24 @@ public class JActorStackOverflowPinger extends JLPCActor {
 
         /** Sends one ping request to the Ponger. */
         private void ping() throws Exception {
-            ponger.ping(pinger, new RP<String>() {
+            ponger.ping(pinger, new RP<Integer>() {
                 @Override
-                public void processResponse(final String response)
+                public void processResponse(final Integer response)
                         throws Exception {
                     done++;
+                    if (done != response.intValue()) {
+                        throw new IllegalStateException("Expected " + done
+                                + " but got " + response);
+                    }
                     if (done < count) {
                         // again ...
                         ping();
                     } else {
-                        responseProcessor.processResponse("done");
+                        responseProcessor.processResponse(done);
                     }
 
                 }
-            });
+            }, done);
         }
 
         /** Process the hammer request. */
@@ -102,9 +106,9 @@ public class JActorStackOverflowPinger extends JLPCActor {
     }
 
     /** Tells the pinger to hammer the Ponger. Blocks and return results. */
-    public String hammer(final JActorStackOverflowPonger ponger, final int count)
-            throws Exception {
+    public Integer hammer(final JActorStackOverflowPonger ponger,
+            final int count) throws Exception {
         final JAFuture future = new JAFuture();
-        return new HammerRequest2(ponger, count).send(future, this);
+        return new HammerRequest(ponger, count).send(future, this);
     }
 }

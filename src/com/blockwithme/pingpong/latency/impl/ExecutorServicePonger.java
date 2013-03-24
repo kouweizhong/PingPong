@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blockwithme.pingpong;
+package com.blockwithme.pingpong.latency.impl;
 
 import java.util.concurrent.ExecutorService;
 
@@ -40,28 +40,28 @@ public class ExecutorServicePonger extends ExecutorServiceActor {
 
     /** Pong's reply */
     public static class PongReply {
-        public final String pong;
+        public final int output;
 
         /** Creates a PongReply */
-        public PongReply(final String _pong) {
-            pong = _pong;
+        public PongReply(final int _output) {
+            output = _output;
         }
     }
 
     /** A Ping request, targeted at Ponger. */
     private static class PingRequest {
-        private final String from;
+        private final int input;
 
         /** Create a PingRequest */
-        public PingRequest(final String _from) {
-            from = _from;
+        public PingRequest(final int _input) {
+            input = _input;
         }
 
-        /** Processes the ping(String) request, from within the Thread of the Ponger. */
+        /** Processes the ping(int) request, from within the Thread of the Ponger. */
         public PongReply processRequest(final ExecutorServicePonger ponger)
                 throws Exception {
-            return new PongReply("Pong " + (ponger.pings++) + " to " + from
-                    + "!");
+            ponger.pings++;
+            return new PongReply(input + 1);
         }
     }
 
@@ -70,9 +70,9 @@ public class ExecutorServicePonger extends ExecutorServiceActor {
         super(_executorService);
     }
 
-    /** Sends a ping(String) request to the Ponger. */
-    public void ping(final String from, final ExecutorServiceActor sender)
+    /** Sends a ping(int) request to the Ponger. */
+    public void ping(final int _input, final ExecutorServiceActor sender)
             throws Exception {
-        queueMessage(new PingRequest(from), sender);
+        queueMessage(new PingRequest(_input), sender);
     }
 }

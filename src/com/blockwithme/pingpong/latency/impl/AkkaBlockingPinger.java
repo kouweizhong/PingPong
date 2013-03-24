@@ -13,17 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blockwithme.pingpong;
+package com.blockwithme.pingpong.latency.impl;
 
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
 
 /**
  * The Pinger's job is to hammer the Ponger with ping() request.
- * Implemented in Akka, by having the processing of the responses cause the new
- * request, therefore not requiring blocking.
+ * Implemented with Akka, using blocking Futures.
  */
-public class AkkaNonBlockingPinger extends UntypedActor {
+public class AkkaBlockingPinger extends UntypedActor {
     /** A Hammer request, targeted at Pinger. */
     public static class HammerRequest {
         /** The Ponger to hammer. */
@@ -40,42 +39,24 @@ public class AkkaNonBlockingPinger extends UntypedActor {
 
         /** Process the hammer request.
          * @param sender */
-        public void processRequest(final AkkaNonBlockingPinger pinger,
+        public void processRequest(final AkkaBlockingPinger pinger,
                 final ActorRef sender) throws Exception {
-            pinger.count = count;
-            pinger.ponger = ponger;
-            pinger.requester = sender;
             final ActorRef pingerRef = pinger.getSelf();
-            // Sends the first ping, to start the loop.
-            AkkaNonBlockingPonger.ping(pingerRef, ponger);
+            int done = 0;
+            while (done < count) {
+                final Integer response = AkkaBlockingPonger.ping(pingerRef,
+                        ponger, done);
+                done++;
+                if (done != response.intValue()) {
+                    throw new IllegalStateException("Expected " + done
+                            + " but got " + response);
+                }
+            }
+            sender.tell(done, pingerRef);
         }
     }
 
-    /** Number of replies received. */
-    private int pongs;
-
-    /** The Ponger to hammer. */
-    private ActorRef ponger;
-
-    /** The requester. */
-    private ActorRef requester;
-
-    /** The number of exchanges to do. */
-    private int count;
-
-    /** Reacts to PongReply
-     * @throws Exception */
-    private void onReply(final AkkaNonBlockingPonger.PongReply reply)
-            throws Exception {
-        pongs++;
-        if (pongs < count) {
-            AkkaNonBlockingPonger.ping(getSelf(), ponger);
-        } else {
-            requester.tell("done", getSelf());
-        }
-    }
-
-    /** Creates a HammerRequest, to hammer the Ponger. Does NOT send the request. */
+    /** Tells the pinger to hammer the Ponger. Describes the speed in the result. */
     public static HammerRequest hammer(final ActorRef ponger, final int _count)
             throws Exception {
         return new HammerRequest(ponger, _count);
@@ -87,8 +68,6 @@ public class AkkaNonBlockingPinger extends UntypedActor {
         if (msg instanceof HammerRequest) {
             final HammerRequest req = (HammerRequest) msg;
             req.processRequest(this, getSender());
-        } else if (msg instanceof AkkaNonBlockingPonger.PongReply) {
-            onReply((AkkaNonBlockingPonger.PongReply) msg);
         } else {
             unhandled(msg);
         }

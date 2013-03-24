@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blockwithme.pingpong;
+package com.blockwithme.pingpong.latency.impl;
 
 import org.agilewiki.pactor.Mailbox;
 import org.agilewiki.pactor.RequestBase;
@@ -33,23 +33,22 @@ public class PActorNonBlockingPonger {
     private int pings;
 
     /** A Ping request, targeted at Ponger. */
-    private class PingRequest extends RequestBase<String> {
-        /** SOme state needed to process the request. */
-        private final String from;
+    private class PingRequest extends RequestBase<Integer> {
+        /** Some state needed to process the request. */
+        private final int input;
 
         /** Creates a Ping request. */
-        public PingRequest(final Mailbox mbox, final String _from) {
+        public PingRequest(final Mailbox mbox, final int _input) {
             super(mbox);
-            from = _from;
+            input = _input;
         }
 
         /** Processes the ping(String) request, from within the Thread of the Ponger. */
         @Override
         public void processRequest(
-                final ResponseProcessor<String> responseProcessor)
+                final ResponseProcessor<Integer> responseProcessor)
                 throws Exception {
-            responseProcessor.processResponse("Pong " + (pings++) + " to "
-                    + from + "!");
+            responseProcessor.processResponse(input + 1);
         }
     }
 
@@ -60,8 +59,9 @@ public class PActorNonBlockingPonger {
 
     /** Sends a ping(String) request to the Ponger. */
     public void ping(final PActorNonBlockingPinger from,
-            final ResponseProcessor<String> responseProcessor) throws Exception {
-        new PingRequest(mailbox, from.toString()).reply(from.getMailbox(),
+            final ResponseProcessor<Integer> responseProcessor, final int input)
+            throws Exception {
+        new PingRequest(mailbox, input).reply(from.getMailbox(),
                 responseProcessor);
     }
 }

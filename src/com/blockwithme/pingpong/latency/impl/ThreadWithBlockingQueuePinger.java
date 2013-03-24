@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blockwithme.pingpong;
+package com.blockwithme.pingpong.latency.impl;
 
 import java.util.concurrent.Semaphore;
 
@@ -44,7 +44,7 @@ public class ThreadWithBlockingQueuePinger extends ActorThreadWithBlockingQueue 
             pinger.count = count;
             pinger.ponger = ponger;
             // Sends the first ping
-            ponger.ping(pinger.toString(), pinger);
+            ponger.ping(0, pinger);
         }
     }
 
@@ -65,19 +65,23 @@ public class ThreadWithBlockingQueuePinger extends ActorThreadWithBlockingQueue 
     private void onReply(final ThreadWithBlockingQueuePonger.PongReply reply)
             throws Exception {
         pongs++;
+        if (reply.output != pongs) {
+            throw new IllegalStateException("Expected " + pongs + " but got "
+                    + reply.output);
+        }
         if (pongs < count) {
-            ponger.ping(this.toString(), this);
+            ponger.ping(pongs, this);
         } else {
             sem.release();
         }
     }
 
     /** Tells the pinger to hammer the Ponger. Blocks and returns the result. */
-    public String hammer(final ThreadWithBlockingQueuePonger ponger,
+    public Integer hammer(final ThreadWithBlockingQueuePonger ponger,
             final int _count) throws Exception {
         queueMessage(new HammerRequest(ponger, _count), this);
         sem.acquire();
-        return "done";
+        return pongs;
     }
 
     /** Process all incoming messages, including replies. */

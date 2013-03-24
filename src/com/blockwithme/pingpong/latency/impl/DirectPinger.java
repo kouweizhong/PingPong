@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blockwithme.pingpong;
+package com.blockwithme.pingpong.latency.impl;
 
 /**
  * The Pinger's job is to hammer the Ponger with ping() request.
@@ -35,20 +35,22 @@ public class DirectPinger {
         }
 
         /** Process the hammer request. */
-        public String processRequest(final DirectPinger pinger)
-                throws Exception {
-            final String name = pinger.toString();
+        public int processRequest(final DirectPinger pinger) throws Exception {
             int done = 0;
             while (done < count) {
-                ponger.ping(name);
+                final int response = ponger.ping(done);
                 done++;
+                if (response != done) {
+                    throw new IllegalStateException("Expected " + done
+                            + " but got " + response);
+                }
             }
-            return "done";
+            return done;
         }
     }
 
     /** Tells the pinger to hammer the Ponger. Blocks and returns the result. */
-    public String hammer(final DirectPonger ponger, final int _count)
+    public int hammer(final DirectPonger ponger, final int _count)
             throws Exception {
         return new HammerRequest(ponger, _count).processRequest(this);
     }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blockwithme.pingpong;
+package com.blockwithme.pingpong.latency.impl;
 
 import org.agilewiki.jactor.Actor;
 import org.agilewiki.jactor.Mailbox;
@@ -31,12 +31,12 @@ public class JActorIteratorPonger extends JLPCActor {
 
     /** A Ping request, targeted at Ponger. */
     private static class PingRequest extends
-            Request<String, JActorIteratorPonger> {
-        private final String from;
+            Request<Integer, JActorIteratorPonger> {
+        private final int input;
 
         /** Creates a Ping request. */
-        public PingRequest(final String _from) {
-            from = _from;
+        public PingRequest(final int _input) {
+            input = _input;
         }
 
         /** Processes the ping(String) request, from within the Thread of the Ponger. */
@@ -46,8 +46,8 @@ public class JActorIteratorPonger extends JLPCActor {
                 @SuppressWarnings("rawtypes") final RP responseProcessor)
                 throws Exception {
             final JActorIteratorPonger ponger = (JActorIteratorPonger) targetActor;
-            responseProcessor.processResponse("Pong " + (ponger.pings++)
-                    + " to " + from + "!");
+            ponger.pings++;
+            responseProcessor.processResponse(input + 1);
         }
 
         @Override
@@ -63,8 +63,8 @@ public class JActorIteratorPonger extends JLPCActor {
     }
 
     /** Sends a ping(String) request to the Ponger. */
-    public void ping(final JActorIteratorPinger pinger, final RP<String> rp)
-            throws Exception {
-        new PingRequest(pinger.toString()).send(pinger, this, rp);
+    public void ping(final JActorIteratorPinger pinger, final RP<Integer> rp,
+            final int _input) throws Exception {
+        new PingRequest(_input).send(pinger, this, rp);
     }
 }
