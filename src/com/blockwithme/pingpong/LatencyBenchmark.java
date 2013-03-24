@@ -20,6 +20,7 @@ import java.util.concurrent.Executors;
 
 import org.agilewiki.jactor.JAMailboxFactory;
 import org.agilewiki.jactor.MailboxFactory;
+import org.agilewiki.pactor.impl.DefaultMailboxFactoryImpl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -67,8 +68,8 @@ public class LatencyBenchmark extends AbstractBenchmark {
     /** The JActor MailboxFactory */
     private MailboxFactory jaMailboxFactory;
 
-    /** The PActor MailboxFactory */
-    private org.agilewiki.pactor.MailboxFactory paMailboxFactory;
+    /** The PActor Default MailboxFactory */
+    private DefaultMailboxFactoryImpl paMailboxFactory;
 
     /** The ExecutorService */
     private ExecutorService executorService;
@@ -78,20 +79,23 @@ public class LatencyBenchmark extends AbstractBenchmark {
     public void setup() {
         system = ActorSystem.create("AkkaTest");
         jaMailboxFactory = JAMailboxFactory.newMailboxFactory(2);
-        paMailboxFactory = new org.agilewiki.pactor.MailboxFactory();
+        paMailboxFactory = new DefaultMailboxFactoryImpl(executorService, false);
         executorService = Executors.newCachedThreadPool();
     }
 
-    /** Shuts down all "services" for all test methods. */
+    /** Shuts down all "services" for all test methods.
+     * @throws Exception */
     @After
-    public void teardown() {
+    public void teardown() throws Exception {
         system.shutdown();
         system = null;
         jaMailboxFactory.close();
         jaMailboxFactory = null;
-        paMailboxFactory.shutdown();
+        paMailboxFactory.close();
         paMailboxFactory = null;
-        executorService.shutdown();
+        if (!executorService.isShutdown()) {
+            executorService.shutdownNow();
+        }
         executorService = null;
     }
 
