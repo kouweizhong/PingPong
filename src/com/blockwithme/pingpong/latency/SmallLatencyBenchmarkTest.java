@@ -53,7 +53,7 @@ import com.carrotsearch.junitbenchmarks.annotation.BenchmarkMethodChart;
  */
 @AxisRange(min = 0, max = 3)
 @BenchmarkMethodChart(filePrefix = "PingPongFastBenchmarks")
-public class SmallLatencyBenchmark extends AbstractBenchmark {
+public class SmallLatencyBenchmarkTest extends AbstractBenchmark {
 
     /** Sets the benchmark properties, for stats and graphics generation. */
     static {

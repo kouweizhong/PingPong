@@ -49,7 +49,7 @@ import com.carrotsearch.junitbenchmarks.annotation.BenchmarkMethodChart;
  */
 @AxisRange(min = 0, max = 3)
 @BenchmarkMethodChart(filePrefix = "PingPongFullBenchmarks")
-public class FullLatencyBenchmark extends SmallLatencyBenchmark {
+public class FullLatencyBenchmarkTest extends SmallLatencyBenchmarkTest {
     /** Tests using an ExecutorService. */
     @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
     @Test
