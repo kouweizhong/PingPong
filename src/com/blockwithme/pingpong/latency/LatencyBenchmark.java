@@ -21,6 +21,7 @@ import java.util.concurrent.Executors;
 import org.agilewiki.jactor.JAMailboxFactory;
 import org.agilewiki.jactor.MailboxFactory;
 import org.agilewiki.pactor.impl.DefaultMailboxFactoryImpl;
+import org.jetlang.fibers.PoolFiberFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,6 +49,8 @@ import com.blockwithme.pingpong.latency.impl.JActorIteratorPinger;
 import com.blockwithme.pingpong.latency.impl.JActorIteratorPonger;
 import com.blockwithme.pingpong.latency.impl.JActorStackOverflowPinger;
 import com.blockwithme.pingpong.latency.impl.JActorStackOverflowPonger;
+import com.blockwithme.pingpong.latency.impl.JetlangPinger;
+import com.blockwithme.pingpong.latency.impl.JetlangPonger;
 import com.blockwithme.pingpong.latency.impl.PActorBlockingPinger;
 import com.blockwithme.pingpong.latency.impl.PActorBlockingPonger;
 import com.blockwithme.pingpong.latency.impl.PActorNonBlockingPinger;
@@ -96,13 +99,17 @@ public class LatencyBenchmark extends AbstractBenchmark {
     /** The ExecutorService */
     private ExecutorService executorService;
 
+    /** Factory for JetLang fibers. */
+    private PoolFiberFactory fiberPool;
+
     /** Setup all "services" for all test methods. */
     @Before
     public void setup() {
+        executorService = Executors.newCachedThreadPool();
         system = ActorSystem.create("AkkaTest");
         jaMailboxFactory = JAMailboxFactory.newMailboxFactory(2);
         paMailboxFactory = new DefaultMailboxFactoryImpl(executorService, false);
-        executorService = Executors.newCachedThreadPool();
+        fiberPool = new PoolFiberFactory(executorService);
     }
 
     /** Shuts down all "services" for all test methods.
@@ -115,6 +122,8 @@ public class LatencyBenchmark extends AbstractBenchmark {
         jaMailboxFactory = null;
         paMailboxFactory.close();
         paMailboxFactory = null;
+        fiberPool.dispose();
+        fiberPool = null;
         if (!executorService.isShutdown()) {
             executorService.shutdownNow();
         }
@@ -288,6 +297,37 @@ public class LatencyBenchmark extends AbstractBenchmark {
                 paMailboxFactory.createMailbox());
         final PActorNonBlockingPonger ponger = new PActorNonBlockingPonger(
                 pinger.getMailbox());
+        final Integer result = pinger.hammer(ponger, MESSAGES);
+        if (result.intValue() != MESSAGES) {
+            throw new IllegalStateException("Expected " + MESSAGES
+                    + " but got " + result);
+        }
+    }
+
+    /** Test with Kilim. */
+/*
+    @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
+    @Test
+    public void testKilim() throws Exception {
+        final kilim.Mailbox<Object> pingerMB = new kilim.Mailbox<Object>();
+        final kilim.Mailbox<Object> pongerMB = new kilim.Mailbox<Object>();
+        final KilimPonger ponger = new KilimPonger(pingerMB, pongerMB);
+        final KilimPinger pinger = new KilimPinger(pingerMB, ponger);
+        pingerMB.start();
+        pongerMB.start();
+        final Integer result = pinger.hammer(MESSAGES);
+        if (result.intValue() != MESSAGES) {
+            throw new IllegalStateException("Expected " + MESSAGES
+                    + " but got " + result);
+        }
+    }
+*/
+    /** Test with JetLang. */
+    @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
+    @Test
+    public void testJetLang() throws Exception {
+        final JetlangPinger pinger = new JetlangPinger(fiberPool.create());
+        final JetlangPonger ponger = new JetlangPonger(fiberPool.create());
         final Integer result = pinger.hammer(ponger, MESSAGES);
         if (result.intValue() != MESSAGES) {
             throw new IllegalStateException("Expected " + MESSAGES

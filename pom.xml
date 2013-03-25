@@ -43,6 +43,33 @@
 		<sourceDirectory>src</sourceDirectory>
 		<testSourceDirectory>test</testSourceDirectory>
 		<plugins>
+<!--
+	        <plugin>
+	            <groupId>org.codehaus.mojo</groupId>
+	            <artifactId>exec-maven-plugin</artifactId>
+	            <version>1.2.1</version>
+	            <executions>
+	                <execution>
+	                    <id>weave test classes</id>
+	                    <phase>process-classes</phase>
+	                    <goals>
+	                        <goal>exec</goal>
+	                    </goals>
+	                    <configuration>
+	                        <executable>java</executable>
+	                        <arguments>
+	                            <argument>-classpath</argument>
+	                            <classpath />
+	                            <argument>kilim.tools.Weaver</argument>
+	                            <argument>${project.build.outputDirectory}</argument>
+	                            <argument>-d</argument>
+	                            <argument>${project.build.outputDirectory}</argument>
+	                        </arguments>
+	                    </configuration>
+	                </execution>
+	            </executions>
+	        </plugin>
+ -->
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>2.3.2</version>
@@ -69,6 +96,7 @@
 	</build>
 
 	<dependencies>
+		<!-- Benchmark API dependencies -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -79,7 +107,13 @@
 			<artifactId>junit-benchmarks</artifactId>
 			<version>0.4.0</version>
 		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<version>1.3.171</version>
+		</dependency>
 
+		<!-- Actor APIs dependencies -->
 		<dependency>
 			<groupId>org.agilewiki.jactor</groupId>
 			<artifactId>jactor</artifactId>
@@ -95,10 +129,23 @@
 			<artifactId>akka-actor_2.10</artifactId>
 			<version>2.2-M1</version>
 		</dependency>
+        <dependency>
+            <groupId>org.jetlang</groupId>
+            <artifactId>jetlang</artifactId>
+            <version>0.2.10</version>
+        </dependency>
+        <!-- Needed by Kilim -->
 		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
-			<version>1.3.171</version>
+			<groupId>asm</groupId>
+			<artifactId>asm-all</artifactId>
+			<version>2.2.3</version>
+		</dependency>
+		<dependency>
+		    <groupId>kilim</groupId>
+		    <artifactId>kilim</artifactId>
+		    <version>0.7</version>
+		    <scope>system</scope>
+		    <systemPath>${project.basedir}/lib/kilim-runtime-0.7.jar</systemPath>
 		</dependency>
 	</dependencies>
 </project>

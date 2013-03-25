@@ -7,6 +7,9 @@ The goal is to measure *latency*, not throughput. That is why I do sequential re
 
 In particular, JActors, PActors, Akka, and simple threads. More to come.
 
+Discussion forum:
+* https://groups.google.com/forum/#!forum/agilewikidevelopers
+
 In particular, we would like submissions for:
 
 * http://www.malhar.net/sriram/kilim/
