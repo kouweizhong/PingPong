@@ -1,0 +1,27 @@
+{
+"cols": [
+{"label": "method", "type": "string"},
+{"label": "Average time [s]", "type": "number"},
+{"label": "StdDev", "type": "number"},
+{"label": "GC time [s]", "type": "number"},
+{"label": "GC average [s]", "type": "number"},
+{"label": "StdDev", "type": "number"},
+{"label": "GC calls", "type": "number"},
+{"label": "benchmark rounds", "type": "number"},
+{"label": "warmup rounds", "type": "number"},
+{"label": "Total benchmark time", "type": "number"},
+{"label": "Total warmup time", "type": "number"}
+],
+"rows": [
+{"c": [{"v": "testExecutorService"}, {"v": 4.88}, {"v": 0.49}, {"v": 0.07}, {"v": 0.0}, {"v": 0.0}, {"v": 98}, {"v": 10}, {"v": 3}, {"v": 48.79}, {"v": 13.68}]},
+{"c": [{"v": "testThreadWithBlockingQueue"}, {"v": 10.95}, {"v": 2.52}, {"v": 0.13}, {"v": 0.0}, {"v": 0.0}, {"v": 200}, {"v": 10}, {"v": 3}, {"v": 109.47}, {"v": 23.83}]},
+{"c": [{"v": "testAkkaBlocking"}, {"v": 33.74}, {"v": 3.09}, {"v": 2.93}, {"v": 0.0}, {"v": 0.0}, {"v": 220}, {"v": 10}, {"v": 3}, {"v": 337.43}, {"v": 97.63}]},
+{"c": [{"v": "testAkkaNonBlocking"}, {"v": 13.98}, {"v": 5.89}, {"v": 0.33}, {"v": 0.0}, {"v": 0.0}, {"v": 141}, {"v": 10}, {"v": 3}, {"v": 139.84}, {"v": 32.06}]},
+{"c": [{"v": "testJActorBlocking"}, {"v": 9.4}, {"v": 3.23}, {"v": 0.45}, {"v": 0.0}, {"v": 0.0}, {"v": 143}, {"v": 10}, {"v": 3}, {"v": 93.99}, {"v": 27.65}]},
+{"c": [{"v": "testJActorIterator"}, {"v": 0.08}, {"v": 0.01}, {"v": 0.04}, {"v": 0.0}, {"v": 0.0}, {"v": 10}, {"v": 10}, {"v": 3}, {"v": 0.81}, {"v": 0.28}]},
+{"c": [{"v": "testJActorStackOverflow"}, {"v": 0.27}, {"v": 0.01}, {"v": 0.04}, {"v": 0.0}, {"v": 0.0}, {"v": 6}, {"v": 10}, {"v": 3}, {"v": 2.67}, {"v": 1.08}]},
+{"c": [{"v": "testPActorBlocking"}, {"v": 8.39}, {"v": 1.68}, {"v": 0.05}, {"v": 0.0}, {"v": 0.0}, {"v": 17}, {"v": 10}, {"v": 3}, {"v": 83.94}, {"v": 26.41}]},
+{"c": [{"v": "testPActorNonBlocking"}, {"v": 0.18}, {"v": 0.01}, {"v": 0.02}, {"v": 0.0}, {"v": 0.0}, {"v": 5}, {"v": 10}, {"v": 3}, {"v": 1.79}, {"v": 0.67}]},
+{"c": [{"v": "testDirect"}, {"v": 0.01}, {"v": 0.0}, {"v": 0.0}, {"v": 0.0}, {"v": 0.0}, {"v": 0}, {"v": 10}, {"v": 3}, {"v": 0.07}, {"v": 0.03}]},
+{"c": [{"v": "testJetLang"}, {"v": 0.48}, {"v": 0.02}, {"v": 0.03}, {"v": 0.0}, {"v": 0.0}, {"v": 7}, {"v": 10}, {"v": 3}, {"v": 4.79}, {"v": 1.58}]}
+]}
