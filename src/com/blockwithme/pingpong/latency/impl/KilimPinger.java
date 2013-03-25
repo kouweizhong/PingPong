@@ -62,7 +62,7 @@ public class KilimPinger extends Task {
     }
 
     @Override
-    public void execute() throws Pausable {
+    public void execute() throws Pausable, Exception {
         while (true) {
             final Object msg = pingerMB.get();
             if (msg instanceof HammerRequest) {
@@ -101,7 +101,7 @@ public class KilimPinger extends Task {
     }
 
     /** Tells the pinger to hammer the Ponger. Blocks and returns the result. */
-    public Integer hammer(final int _count) throws Exception {
+    public Integer hammer(final int _count) throws Pausable, Exception {
         final Mailbox<Integer> callerMB = new Mailbox<Integer>();
         pingerMB.put(new HammerRequest(_count, callerMB));
         return callerMB.get();

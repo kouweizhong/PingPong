@@ -26,6 +26,8 @@ We use http://labs.carrotsearch.com/junit-benchmarks.html for the benchmark impl
 We are currently testing JActors, PActors, Akka, JetLang and simple threads. In some cases, multiple variants are used.
 
 We have a have-finished Kilim implementation. Lack of Maven support and the bytecode weaving requirement makes things a lot more difficult then for the other APIs.
+Thsi seem to work: java -classpath lib/kilim-0.7.jar kilim.tools.Weaver target/classes -d target/kilim
+But needs to be correctly integrated in the POM.
 
 And maybe we will add Groovy actors too. But we don't plan to add anything that had no update in the last year or so.
 

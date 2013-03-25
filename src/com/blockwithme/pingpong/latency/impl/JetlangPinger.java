@@ -125,7 +125,7 @@ public class JetlangPinger {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public Integer hammer(final JetlangPonger ponger, final int _count)
             throws Exception {
-        final AtomicReference response = new AtomicReference<>();
+        final AtomicReference response = new AtomicReference();
         final HammerRequest req = new HammerRequest(ponger, _count);
         final CountDownLatch done = new CountDownLatch(1);
         final Callback onReply = new Callback() {

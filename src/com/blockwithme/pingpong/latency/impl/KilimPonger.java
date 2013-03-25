@@ -54,26 +54,21 @@ public class KilimPonger extends Task {
     }
 
     @Override
-    public void execute() throws Pausable {
+    public void execute() throws Pausable, Exception {
         while (true) {
             final Object msg = pongerMB.get();
             if (msg instanceof PingRequest) {
                 final PingRequest req = (PingRequest) msg;
-                try {
-                    pingerMB.put(req.processRequest(this));
-                } catch (final Exception e) {
-                    e.printStackTrace();
-                    return;
-                }
+                pingerMB.put(req.processRequest(this));
             } else {
-                new Exception("Expceted PingRequest but got " + msg.getClass())
-                        .printStackTrace();
+                throw new Exception("Expceted PingRequest but got "
+                        + msg.getClass());
             }
         }
     }
 
     /** Sends a ping(int) request to the Ponger. Blocks and returns response. */
-    public void ping(final int input) throws Exception {
+    public void ping(final int input) throws Pausable, Exception {
         pongerMB.put(new PingRequest(input));
     }
 }
