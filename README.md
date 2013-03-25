@@ -3,24 +3,38 @@ PingPong
 
 Shows how to implement a simple request-reply example using multiple Java Actor APIs, as a benchmark.
 
+This doesn't try to be a perfect benchmark, and does not claim to be meaningful for your own use-case.
+
+Alos, doing throughput benchmarks is a lot harder, so we might not do that in the near future.
+
 The goal is to measure *latency*, not throughput. That is why I do sequential request/reply cycles.
 
-In particular, JActors, PActors, Akka, and simple threads. More to come.
+The worlkflow goes like this:
+
+1) The "main" (unit test) creates, starts the pinger and ponger actors.
+2) The "main" sends the "hammer request" to the pinger.
+3) The pinger starts to hammer the ponger.
+4) The pinger sends a ping to the ponger, waits for the pong, and sends the next ping.
+5) Reapeat #4 1 million time.
+6) Send # of cycles back to "main".
+7) Done
+
+We have 3 warm-up rounds, and 10 measured rounds, which are averaged. Some variants/APIs take much longer, so expect 10 to 20 minutes runtime. The runtime will also increase as we add new APIs.
+
+We use http://labs.carrotsearch.com/junit-benchmarks.html for the benchmark implementation. It will create an HTMNL result file in the "charts" directory. I haven't worked out how to visualize it locally, due to some JavaScript issue. So it needs to be delivered by a real webserver.
+
+We are currently testing JActors, PActors, Akka, JetLang and simple threads. In some cases, multiple variants are used.
+
+We have a have-finished Kilim implementation. Lack of Maven support and the bytecode weaving requirement makes things a lot more difficult then for the other APIs.
+
+And maybe we will add Groovy actors too. But we don't plan to add anything that had no update in the last year or so.
 
 Discussion forum:
+
 * https://groups.google.com/forum/#!forum/agilewikidevelopers
 
-In particular, we would like submissions for:
+Please poast any questions, comments or patch there.
 
-* http://www.malhar.net/sriram/kilim/
-* http://code.google.com/p/jetlang/
-
-And we would accept submissions for other actor frameworks, that we do not know about (assuming they are still actively mainained).
-
-For Kilim and JetLang, this link with some other benchmarks could be a start:
-
-http://sujitpal.blogspot.in/2009/01/more-java-actor-frameworks-compared.html
-
-Current results, on my aging Intel Xeon X3360 @2.83 GHz, with 800 MHz RAM, PC, can be seen here:
+Current results, on my aging Intel Xeon X3360 @2.83 GHz, with 800 MHz RAM, Win7 PC, on Java 7, can be seen here:
 
 http://skunkiferous.github.com/PingPong/
