@@ -23,13 +23,27 @@ We have 3 warm-up rounds, and 10 measured rounds, which are averaged. Some varia
 
 We use http://labs.carrotsearch.com/junit-benchmarks.html for the benchmark implementation. It will create an HTML result file in the "charts" directory. I haven't worked out how to visualize it locally, due to some JavaScript issue. So it needs to be delivered by a real webserver.
 
-We are currently testing JActors, PActors, Akka, JetLang and simple threads. In some cases, multiple variants are used.
+We are currently testing the following JVM-based actor implementations:
+
+* JActors: https://github.com/laforge49/JActor
+* PActors: https://github.com/laforge49/PActor
+* Akka: http://akka.io/
+* JetLang: http://code.google.com/p/jetlang/
+* And simple threads.
+
+In some cases, multiple variants are tested.
 
 We have a have-finished Kilim implementation. Lack of Maven support and the bytecode weaving requirement makes things a lot more difficult then for the other APIs.
-Thsi seem to work: java -classpath lib/kilim-0.7.jar kilim.tools.Weaver target/classes -d target/kilim
+This seem to work: java -classpath lib/kilim-0.7.jar kilim.tools.Weaver target/classes -d target/kilim
 But needs to be correctly integrated in the POM.
 
 And maybe we will add Groovy actors too. But we don't plan to add anything that had no update in the last year or so.
+
+Note: To get the test working locally, you will need to "mvn install" the following Github repositories:
+
+* https://github.com/laforge49/JActor.git
+* https://github.com/laforge49/PActor.git
+* https://github.com/laforge49/PAMailbox.git
 
 Discussion forum:
 
