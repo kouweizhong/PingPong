@@ -1,18 +1,3 @@
-*.class
-# Package Files #
-*.jar
-*.war
-*.ear
-.metadata
-*.bak
-data
-log
 target
-bin
-conf
-META-INF
-/nbproject/private/
-
-benchmarks.h2.db
-benchmarks.lock.db
 charts
+benchmarks.h2.db

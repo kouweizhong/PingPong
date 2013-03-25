@@ -19,7 +19,7 @@ The worlkflow goes like this:
 6. Send # of cycles back to "main".
 7. Done
 
-We have 3 warm-up rounds, and 10 measured rounds, which are averaged. Some variants/APIs take much longer, so expect 10 to 20 minutes runtime. The runtime will also increase as we add new APIs.
+We have 3 warm-up rounds, and 10 measured rounds, which are averaged. Some variants/APIs take much longer, so expect 10 to 20 minutes runtime. The total runtime will also increase as we add new APIs.
 
 We use http://labs.carrotsearch.com/junit-benchmarks.html for the benchmark implementation. It will create an HTML result file in the "charts" directory. I haven't worked out how to visualize it locally, due to some JavaScript issue. So it needs to be delivered by a real webserver.
 
