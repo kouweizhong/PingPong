@@ -34,14 +34,15 @@ public class DirectPonger {
         }
 
         /** Processes the ping(int) request. */
-        public int processRequest(final DirectPonger ponger) throws Exception {
+        public Integer processRequest(final DirectPonger ponger)
+                throws Exception {
             ponger.pings++;
             return input + 1;
         }
     }
 
     /** Sends a ping(int) request to the Ponger. Blocks and returns response. */
-    public int ping(final int input) throws Exception {
+    public Integer ping(final int input) throws Exception {
         return new PingRequest(input).processRequest(this);
     }
 }

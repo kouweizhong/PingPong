@@ -38,9 +38,9 @@ public class DirectPinger {
         public int processRequest(final DirectPinger pinger) throws Exception {
             int done = 0;
             while (done < count) {
-                final int response = ponger.ping(done);
+                final Integer response = ponger.ping(done);
                 done++;
-                if (response != done) {
+                if (response.intValue() != done) {
                     throw new IllegalStateException("Expected " + done
                             + " but got " + response);
                 }
