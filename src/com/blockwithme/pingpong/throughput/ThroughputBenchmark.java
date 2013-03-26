@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blockwithme.pingpong.latency;
+package com.blockwithme.pingpong.throughput;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -28,14 +28,8 @@ import org.junit.Test;
 
 import akka.actor.ActorSystem;
 
-import com.blockwithme.pingpong.latency.impl.DirectPinger;
-import com.blockwithme.pingpong.latency.impl.DirectPonger;
 import com.blockwithme.pingpong.latency.impl.JActorIteratorPinger;
 import com.blockwithme.pingpong.latency.impl.JActorIteratorPonger;
-import com.blockwithme.pingpong.latency.impl.JActorStackOverflowPinger;
-import com.blockwithme.pingpong.latency.impl.JActorStackOverflowPonger;
-import com.blockwithme.pingpong.latency.impl.JetlangPinger;
-import com.blockwithme.pingpong.latency.impl.JetlangPonger;
 import com.blockwithme.pingpong.latency.impl.PActorNonBlockingPinger;
 import com.blockwithme.pingpong.latency.impl.PActorNonBlockingPonger;
 import com.carrotsearch.junitbenchmarks.AbstractBenchmark;
@@ -52,8 +46,8 @@ import com.carrotsearch.junitbenchmarks.annotation.BenchmarkMethodChart;
  * It only tests the fastest implementations.
  */
 @AxisRange(min = 0, max = 3)
-@BenchmarkMethodChart(filePrefix = "PingPongFastBenchmarks")
-public class SmallLatencyBenchmark extends AbstractBenchmark {
+@BenchmarkMethodChart(filePrefix = "ThroughputBenchmark")
+public class ThroughputBenchmark extends AbstractBenchmark {
 
     /** Sets the benchmark properties, for stats and graphics generation. */
     static {
@@ -63,12 +57,20 @@ public class SmallLatencyBenchmark extends AbstractBenchmark {
     }
 
     /**
-     * How many messages to send per test?
+     * How many messages to send per actor pair?
      *
      * It must be big enough, that the direct impl takes a measurable amount
      * of time. This means that the slower Actor impl will take each several minutes to test.
      */
     protected static final int MESSAGES = 1000;
+
+    /**
+     * How many actors pair per test?
+     *
+     * It must be big enough, that the direct impl takes a measurable amount
+     * of time. This means that the slower Actor impl will take each several minutes to test.
+     */
+    protected static final int PAIRS = 1000;
 
     /** The Akka ActorSystem */
     protected ActorSystem system;
@@ -113,19 +115,6 @@ public class SmallLatencyBenchmark extends AbstractBenchmark {
         executorService = null;
     }
 
-    /** Baseline test: How fast would it go in a single thread? */
-    @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
-    @Test
-    public void testDirect() throws Exception {
-        final DirectPinger pinger = new DirectPinger();
-        final DirectPonger ponger = new DirectPonger();
-        final int result = pinger.hammer(ponger, MESSAGES);
-        if (result != MESSAGES) {
-            throw new IllegalStateException("Expected " + MESSAGES
-                    + " but got " + result);
-        }
-    }
-
     /** Test in JActors, using the Iterator helper class. */
     @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
     @Test
@@ -155,51 +144,4 @@ public class SmallLatencyBenchmark extends AbstractBenchmark {
                     + " but got " + result);
         }
     }
-
-    /** Test non-blocking JActor simplistic impl, which causes occasional Stack-Overflow! */
-    @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
-    @Test
-    public void testJActorStackOverflow() throws Exception {
-        final JActorStackOverflowPinger pinger = new JActorStackOverflowPinger(
-                jaMailboxFactory.createMailbox());
-        final JActorStackOverflowPonger ponger = new JActorStackOverflowPonger(
-                jaMailboxFactory.createMailbox());
-        final Integer result = pinger.hammer(ponger, MESSAGES);
-        if (result.intValue() != MESSAGES) {
-            throw new IllegalStateException("Expected " + MESSAGES
-                    + " but got " + result);
-        }
-    }
-
-    /** Test with JetLang. */
-    @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
-    @Test
-    public void testJetLang() throws Exception {
-        final JetlangPinger pinger = new JetlangPinger(fiberPool.create());
-        final JetlangPonger ponger = new JetlangPonger(fiberPool.create());
-        final Integer result = pinger.hammer(ponger, MESSAGES);
-        if (result.intValue() != MESSAGES) {
-            throw new IllegalStateException("Expected " + MESSAGES
-                    + " but got " + result);
-        }
-    }
-
-    /** Test with Kilim. */
-/*
-    @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
-    @Test
-    public void testKilim() throws Exception {
-        final kilim.Mailbox<Object> pingerMB = new kilim.Mailbox<Object>();
-        final kilim.Mailbox<Object> pongerMB = new kilim.Mailbox<Object>();
-        final KilimPonger ponger = new KilimPonger(pingerMB, pongerMB);
-        final KilimPinger pinger = new KilimPinger(pingerMB, ponger);
-        pingerMB.start();
-        pongerMB.start();
-        final Integer result = pinger.hammer(MESSAGES);
-        if (result.intValue() != MESSAGES) {
-            throw new IllegalStateException("Expected " + MESSAGES
-                    + " but got " + result);
-        }
-    }
-*/
 }
