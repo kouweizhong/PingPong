@@ -18,6 +18,8 @@ package com.blockwithme.pingpong.latency;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import kilim.Pausable;
+
 import org.agilewiki.jactor.JAMailboxFactory;
 import org.agilewiki.jactor.MailboxFactory;
 import org.agilewiki.pamailbox.DefaultMailboxFactoryImpl;
@@ -36,6 +38,8 @@ import com.blockwithme.pingpong.latency.impl.JActorStackOverflowPinger;
 import com.blockwithme.pingpong.latency.impl.JActorStackOverflowPonger;
 import com.blockwithme.pingpong.latency.impl.JetlangPinger;
 import com.blockwithme.pingpong.latency.impl.JetlangPonger;
+import com.blockwithme.pingpong.latency.impl.KilimPinger;
+import com.blockwithme.pingpong.latency.impl.KilimPonger;
 import com.blockwithme.pingpong.latency.impl.PActorNonBlockingPinger;
 import com.blockwithme.pingpong.latency.impl.PActorNonBlockingPonger;
 import com.carrotsearch.junitbenchmarks.AbstractBenchmark;
@@ -185,21 +189,19 @@ public class SmallLatencyBenchmarkTest extends AbstractBenchmark {
     }
 
     /** Test with Kilim. */
-/*
+
     @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
     @Test
-    public void testKilim() throws Exception {
+    public void testKilim() throws Pausable, Exception {
         final kilim.Mailbox<Object> pingerMB = new kilim.Mailbox<Object>();
         final kilim.Mailbox<Object> pongerMB = new kilim.Mailbox<Object>();
         final KilimPonger ponger = new KilimPonger(pingerMB, pongerMB);
         final KilimPinger pinger = new KilimPinger(pingerMB, ponger);
-        pingerMB.start();
-        pongerMB.start();
         final Integer result = pinger.hammer(MESSAGES);
         if (result.intValue() != MESSAGES) {
             throw new IllegalStateException("Expected " + MESSAGES
                     + " but got " + result);
         }
     }
-*/
+
 }
