@@ -1,0 +1,28 @@
+{
+"cols": [
+{"label": "method", "type": "string"},
+{"label": "Average time [s]", "type": "number"},
+{"label": "StdDev", "type": "number"},
+{"label": "GC time [s]", "type": "number"},
+{"label": "GC average [s]", "type": "number"},
+{"label": "StdDev", "type": "number"},
+{"label": "GC calls", "type": "number"},
+{"label": "benchmark rounds", "type": "number"},
+{"label": "warmup rounds", "type": "number"},
+{"label": "Total benchmark time", "type": "number"},
+{"label": "Total warmup time", "type": "number"}
+],
+"rows": [
+{"c": [{"v": "testThreadWithBlockingQueue"}, {"v": 8.77}, {"v": 3.17}, {"v": 0.08}, {"v": 0.0}, {"v": 0.0}, {"v": 115}, {"v": 10}, {"v": 3}, {"v": 87.67}, {"v": 30.7}]},
+{"c": [{"v": "testExecutorService"}, {"v": 2.03}, {"v": 0.1}, {"v": 0.15}, {"v": 0.0}, {"v": 0.0}, {"v": 193}, {"v": 10}, {"v": 3}, {"v": 20.33}, {"v": 6.16}]},
+{"c": [{"v": "testAkkaBlocking"}, {"v": 31.22}, {"v": 1.73}, {"v": 2.66}, {"v": 0.0}, {"v": 0.0}, {"v": 232}, {"v": 10}, {"v": 3}, {"v": 312.17}, {"v": 98.78}]},
+{"c": [{"v": "testAkkaNonBlocking"}, {"v": 8.17}, {"v": 3.2}, {"v": 0.28}, {"v": 0.0}, {"v": 0.0}, {"v": 77}, {"v": 10}, {"v": 3}, {"v": 81.69}, {"v": 25.49}]},
+{"c": [{"v": "testJActorBlocking"}, {"v": 13.68}, {"v": 0.63}, {"v": 0.83}, {"v": 0.0}, {"v": 0.0}, {"v": 257}, {"v": 10}, {"v": 3}, {"v": 136.81}, {"v": 37.4}]},
+{"c": [{"v": "testPActorBlocking"}, {"v": 12.75}, {"v": 0.99}, {"v": 0.79}, {"v": 0.0}, {"v": 0.0}, {"v": 234}, {"v": 10}, {"v": 3}, {"v": 127.55}, {"v": 38.93}]},
+{"c": [{"v": "testDirect"}, {"v": 0.03}, {"v": 0.01}, {"v": 0.03}, {"v": 0.0}, {"v": 0.0}, {"v": 6}, {"v": 10}, {"v": 3}, {"v": 0.27}, {"v": 0.13}]},
+{"c": [{"v": "testJetLang"}, {"v": 0.58}, {"v": 0.03}, {"v": 0.06}, {"v": 0.0}, {"v": 0.0}, {"v": 15}, {"v": 10}, {"v": 3}, {"v": 5.81}, {"v": 1.81}]},
+{"c": [{"v": "testJActorIterator"}, {"v": 0.09}, {"v": 0.02}, {"v": 0.01}, {"v": 0.0}, {"v": 0.0}, {"v": 2}, {"v": 10}, {"v": 3}, {"v": 0.87}, {"v": 0.33}]},
+{"c": [{"v": "testJActorStackOverflow"}, {"v": 0.29}, {"v": 0.01}, {"v": 0.02}, {"v": 0.0}, {"v": 0.0}, {"v": 2}, {"v": 10}, {"v": 3}, {"v": 2.9}, {"v": 1.12}]},
+{"c": [{"v": "testPActorNonBlocking"}, {"v": 0.2}, {"v": 0.0}, {"v": 0.01}, {"v": 0.0}, {"v": 0.0}, {"v": 3}, {"v": 10}, {"v": 3}, {"v": 2.03}, {"v": 0.8}]},
+{"c": [{"v": "testKilimDirectTask"}, {"v": 0.01}, {"v": 0.0}, {"v": 0.0}, {"v": 0.0}, {"v": 0.0}, {"v": 0}, {"v": 10}, {"v": 3}, {"v": 0.09}, {"v": 0.05}]}
+]}

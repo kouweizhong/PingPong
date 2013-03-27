@@ -1,0 +1,22 @@
+{
+"cols": [
+{"label": "method", "type": "string"},
+{"label": "Average time [s]", "type": "number"},
+{"label": "StdDev", "type": "number"},
+{"label": "GC time [s]", "type": "number"},
+{"label": "GC average [s]", "type": "number"},
+{"label": "StdDev", "type": "number"},
+{"label": "GC calls", "type": "number"},
+{"label": "benchmark rounds", "type": "number"},
+{"label": "warmup rounds", "type": "number"},
+{"label": "Total benchmark time", "type": "number"},
+{"label": "Total warmup time", "type": "number"}
+],
+"rows": [
+{"c": [{"v": "testDirect"}, {"v": 0.13}, {"v": 0.0}, {"v": 0.01}, {"v": 0.0}, {"v": 0.0}, {"v": 3}, {"v": 10}, {"v": 3}, {"v": 1.26}, {"v": 0.43}]},
+{"c": [{"v": "testJetLang"}, {"v": 5.67}, {"v": 0.05}, {"v": 0.38}, {"v": 0.0}, {"v": 0.0}, {"v": 155}, {"v": 10}, {"v": 3}, {"v": 56.69}, {"v": 16.79}]},
+{"c": [{"v": "testJActorIterator"}, {"v": 0.71}, {"v": 0.02}, {"v": 0.05}, {"v": 0.0}, {"v": 0.0}, {"v": 18}, {"v": 10}, {"v": 3}, {"v": 7.13}, {"v": 2.15}]},
+{"c": [{"v": "testJActorStackOverflow"}, {"v": 2.73}, {"v": 0.05}, {"v": 0.2}, {"v": 0.0}, {"v": 0.0}, {"v": 32}, {"v": 10}, {"v": 3}, {"v": 27.28}, {"v": 8.24}]},
+{"c": [{"v": "testPActorNonBlocking"}, {"v": 1.99}, {"v": 0.03}, {"v": 0.15}, {"v": 0.0}, {"v": 0.0}, {"v": 52}, {"v": 10}, {"v": 3}, {"v": 19.86}, {"v": 5.74}]},
+{"c": [{"v": "testKilimDirectTask"}, {"v": 0.01}, {"v": 0.0}, {"v": 0.0}, {"v": 0.0}, {"v": 0.0}, {"v": 0}, {"v": 10}, {"v": 3}, {"v": 0.09}, {"v": 0.03}]}
+]}
