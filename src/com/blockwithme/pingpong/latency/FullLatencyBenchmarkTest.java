@@ -50,26 +50,31 @@ import com.carrotsearch.junitbenchmarks.annotation.BenchmarkMethodChart;
 @AxisRange(min = 0, max = 3)
 @BenchmarkMethodChart(filePrefix = "PingPongFullBenchmarks")
 public class FullLatencyBenchmarkTest extends SmallLatencyBenchmarkTest {
+
+    private static final boolean RUN = true;
+
     /** Tests using an ExecutorService. */
     @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
     @Test
     public void testExecutorService() throws Exception {
-        final ExecutorServicePinger pinger = new ExecutorServicePinger(
-                executorService);
-        final ExecutorServicePonger ponger = new ExecutorServicePonger(
-                executorService);
-        try {
+        if (RUN) {
+            final ExecutorServicePinger pinger = new ExecutorServicePinger(
+                    executorService);
+            final ExecutorServicePonger ponger = new ExecutorServicePonger(
+                    executorService);
             try {
-                final Integer result = pinger.hammer(ponger, MESSAGES);
-                if (result != MESSAGES) {
-                    throw new IllegalStateException("Expected " + MESSAGES
-                            + " but got " + result);
+                try {
+                    final Integer result = pinger.hammer(ponger, MESSAGES);
+                    if (result != MESSAGES) {
+                        throw new IllegalStateException("Expected " + MESSAGES
+                                + " but got " + result);
+                    }
+                } finally {
+                    ponger.kill();
                 }
             } finally {
-                ponger.kill();
+                pinger.kill();
             }
-        } finally {
-            pinger.kill();
         }
     }
 
@@ -77,22 +82,24 @@ public class FullLatencyBenchmarkTest extends SmallLatencyBenchmarkTest {
     @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
     @Test
     public void testThreadWithBlockingQueue() throws Exception {
-        final ThreadWithBlockingQueuePinger pinger = new ThreadWithBlockingQueuePinger();
-        final ThreadWithBlockingQueuePonger ponger = new ThreadWithBlockingQueuePonger();
-        pinger.start();
-        try {
-            ponger.start();
+        if (RUN) {
+            final ThreadWithBlockingQueuePinger pinger = new ThreadWithBlockingQueuePinger();
+            final ThreadWithBlockingQueuePonger ponger = new ThreadWithBlockingQueuePonger();
+            pinger.start();
             try {
-                final Integer result = pinger.hammer(ponger, MESSAGES);
-                if (result != MESSAGES) {
-                    throw new IllegalStateException("Expected " + MESSAGES
-                            + " but got " + result);
+                ponger.start();
+                try {
+                    final Integer result = pinger.hammer(ponger, MESSAGES);
+                    if (result != MESSAGES) {
+                        throw new IllegalStateException("Expected " + MESSAGES
+                                + " but got " + result);
+                    }
+                } finally {
+                    ponger.kill();
                 }
             } finally {
-                ponger.kill();
+                pinger.kill();
             }
-        } finally {
-            pinger.kill();
         }
     }
 
@@ -100,19 +107,21 @@ public class FullLatencyBenchmarkTest extends SmallLatencyBenchmarkTest {
     @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
     @Test
     public void testAkkaBlocking() throws Exception {
-        final ActorRef pinger = system.actorOf(new Props(
-                AkkaBlockingPinger.class), "blockingPinger");
-        final ActorRef ponger = system.actorOf(new Props(
-                AkkaBlockingPonger.class), "blockingPonger");
+        if (RUN) {
+            final ActorRef pinger = system.actorOf(new Props(
+                    AkkaBlockingPinger.class), "blockingPinger");
+            final ActorRef ponger = system.actorOf(new Props(
+                    AkkaBlockingPonger.class), "blockingPonger");
 
-        final Timeout timeout = new Timeout(Duration.create(60, "seconds"));
-        final Future<Object> future = Patterns.ask(pinger,
-                AkkaBlockingPinger.hammer(ponger, MESSAGES), timeout);
-        final Integer result = (Integer) Await.result(future,
-                timeout.duration());
-        if (result.intValue() != MESSAGES) {
-            throw new IllegalStateException("Expected " + MESSAGES
-                    + " but got " + result);
+            final Timeout timeout = new Timeout(Duration.create(60, "seconds"));
+            final Future<Object> future = Patterns.ask(pinger,
+                    AkkaBlockingPinger.hammer(ponger, MESSAGES), timeout);
+            final Integer result = (Integer) Await.result(future,
+                    timeout.duration());
+            if (result.intValue() != MESSAGES) {
+                throw new IllegalStateException("Expected " + MESSAGES
+                        + " but got " + result);
+            }
         }
     }
 
@@ -120,19 +129,21 @@ public class FullLatencyBenchmarkTest extends SmallLatencyBenchmarkTest {
     @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
     @Test
     public void testAkkaNonBlocking() throws Exception {
-        final ActorRef pinger = system.actorOf(new Props(
-                AkkaNonBlockingPinger.class), "nonBlockingPinger");
-        final ActorRef ponger = system.actorOf(new Props(
-                AkkaNonBlockingPonger.class), "nonBlockingPonger");
+        if (RUN) {
+            final ActorRef pinger = system.actorOf(new Props(
+                    AkkaNonBlockingPinger.class), "nonBlockingPinger");
+            final ActorRef ponger = system.actorOf(new Props(
+                    AkkaNonBlockingPonger.class), "nonBlockingPonger");
 
-        final Timeout timeout = new Timeout(Duration.create(60, "seconds"));
-        final Future<Object> future = Patterns.ask(pinger,
-                AkkaNonBlockingPinger.hammer(ponger, MESSAGES), timeout);
-        final Integer result = (Integer) Await.result(future,
-                timeout.duration());
-        if (result.intValue() != MESSAGES) {
-            throw new IllegalStateException("Expected " + MESSAGES
-                    + " but got " + result);
+            final Timeout timeout = new Timeout(Duration.create(60, "seconds"));
+            final Future<Object> future = Patterns.ask(pinger,
+                    AkkaNonBlockingPinger.hammer(ponger, MESSAGES), timeout);
+            final Integer result = (Integer) Await.result(future,
+                    timeout.duration());
+            if (result.intValue() != MESSAGES) {
+                throw new IllegalStateException("Expected " + MESSAGES
+                        + " but got " + result);
+            }
         }
     }
 
@@ -140,14 +151,16 @@ public class FullLatencyBenchmarkTest extends SmallLatencyBenchmarkTest {
     @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
     @Test
     public void testJActorBlocking() throws Exception {
-        final JActorBlockingPinger pinger = new JActorBlockingPinger(
-                jaMailboxFactory.createMailbox());
-        final JActorBlockingPonger ponger = new JActorBlockingPonger(
-                jaMailboxFactory.createMailbox());
-        final Integer result = pinger.hammer(ponger, MESSAGES);
-        if (result.intValue() != MESSAGES) {
-            throw new IllegalStateException("Expected " + MESSAGES
-                    + " but got " + result);
+        if (RUN) {
+            final JActorBlockingPinger pinger = new JActorBlockingPinger(
+                    jaMailboxFactory.createMailbox());
+            final JActorBlockingPonger ponger = new JActorBlockingPonger(
+                    jaMailboxFactory.createMailbox());
+            final Integer result = pinger.hammer(ponger, MESSAGES);
+            if (result.intValue() != MESSAGES) {
+                throw new IllegalStateException("Expected " + MESSAGES
+                        + " but got " + result);
+            }
         }
     }
 
@@ -155,14 +168,16 @@ public class FullLatencyBenchmarkTest extends SmallLatencyBenchmarkTest {
     @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
     @Test
     public void testPActorBlocking() throws Exception {
-        final PActorBlockingPinger pinger = new PActorBlockingPinger(
-                paMailboxFactory.createMailbox());
-        final PActorBlockingPonger ponger = new PActorBlockingPonger(
-                paMailboxFactory.createMailbox());
-        final Integer result = pinger.hammer(ponger, MESSAGES);
-        if (result.intValue() != MESSAGES) {
-            throw new IllegalStateException("Expected " + MESSAGES
-                    + " but got " + result);
+        if (RUN) {
+            final PActorBlockingPinger pinger = new PActorBlockingPinger(
+                    paMailboxFactory.createMailbox());
+            final PActorBlockingPonger ponger = new PActorBlockingPonger(
+                    paMailboxFactory.createMailbox());
+            final Integer result = pinger.hammer(ponger, MESSAGES);
+            if (result.intValue() != MESSAGES) {
+                throw new IllegalStateException("Expected " + MESSAGES
+                        + " but got " + result);
+            }
         }
     }
 }

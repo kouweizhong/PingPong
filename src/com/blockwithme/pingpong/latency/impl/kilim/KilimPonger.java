@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blockwithme.pingpong.latency.impl;
+package com.blockwithme.pingpong.latency.impl.kilim;
 
 import kilim.Mailbox;
 import kilim.Pausable;
