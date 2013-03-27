@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blockwithme.pingpong.latency;
+package com.blockwithme.pingpong;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -53,9 +53,9 @@ import com.carrotsearch.junitbenchmarks.annotation.BenchmarkMethodChart;
  * It only tests the fastest implementations.
  */
 @AxisRange(min = 0, max = 2)
-@BenchmarkMethodChart(filePrefix = "PingPongFastBenchmarks")
+@BenchmarkMethodChart(filePrefix = "Benchmark10M")
 @SuppressWarnings("all")
-public class SmallLatencyBenchmarkTest extends AbstractBenchmark {
+public class Benchmark10M extends AbstractBenchmark {
 
     /**
      * How many messages to send per test?

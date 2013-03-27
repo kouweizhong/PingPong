@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blockwithme.pingpong.latency;
+package com.blockwithme.pingpong;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -49,8 +49,8 @@ import com.carrotsearch.junitbenchmarks.annotation.BenchmarkMethodChart;
  * It is in essence a latency test, not a throughput test.
  */
 @AxisRange(min = 0, max = 3)
-@BenchmarkMethodChart(filePrefix = "PingPongFullBenchmarks")
-public class FullLatencyBenchmarkTest extends SmallLatencyBenchmarkTest {
+@BenchmarkMethodChart(filePrefix = "Benchmark1M")
+public class Benchmark1M extends Benchmark10M {
 
     private static final boolean RUN = true;
 
