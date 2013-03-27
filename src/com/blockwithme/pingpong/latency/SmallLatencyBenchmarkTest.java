@@ -63,13 +63,7 @@ public class SmallLatencyBenchmarkTest extends AbstractBenchmark {
      * It must be big enough, that the direct impl takes a measurable amount
      * of time. This means that the slower Actor impl will take each several minutes to test.
      */
-    protected static final int MESSAGES = 1000000;
-
-    /**
-     * Test value that is increased each time the {@link #methodCall()}
-    performs one step.
-     */
-    int step;
+    protected int MESSAGES = 10000000;
 
     /** The ExecutorService */
     protected ExecutorService executorService;

@@ -15,6 +15,7 @@
  */
 package com.blockwithme.pingpong.latency;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import scala.concurrent.Await;
@@ -52,6 +53,14 @@ import com.carrotsearch.junitbenchmarks.annotation.BenchmarkMethodChart;
 public class FullLatencyBenchmarkTest extends SmallLatencyBenchmarkTest {
 
     private static final boolean RUN = true;
+
+    /** Setup all "services" for all test methods. */
+    @Override
+    @Before
+    public void setup() {
+        super.setup();
+        MESSAGES = 1000000;
+    }
 
     /** Tests using an ExecutorService. */
     @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
