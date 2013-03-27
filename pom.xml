@@ -41,12 +41,28 @@
 		<testSourceDirectory>src</testSourceDirectory>
 		<plugins>
 			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.10</version>
+				<executions>
+					<execution>
+						<configuration>
+						<argLine>-XX:-UseSplitVerifier</argLine>
+						</configuration>
+						<id>default-test</id>
+						<phase>test</phase>
+						<goals>
+							<goal>test</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
 				<version>1.2.1</version>
 				<executions>
 					<execution>
-						<id>weave test classes</id>
+						<id>weave source classes</id>
 						<phase>process-classes</phase>
 						<goals>
 							<goal>exec</goal>
@@ -63,8 +79,28 @@
 							</arguments>
 						</configuration>
 					</execution>
+					<execution>
+						<id>weave test classes</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+						<configuration>
+							<executable>java</executable>
+							<arguments>
+								<argument>-classpath</argument>
+								<classpath />
+								<argument>kilim.tools.Weaver</argument>
+								<argument>${project.build.testOutputDirectory}</argument>
+								<argument>-d</argument>
+								<argument>${project.build.testOutputDirectory}</argument>
+							</arguments>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
+
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -107,6 +143,11 @@
 	<dependencies>
 		<!-- Benchmark API dependencies -->
 		<dependency>
+			<groupId>com.blockwithme</groupId>
+			<artifactId>kilim</artifactId>
+			<version>0.7</version>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.10</version>
@@ -148,18 +189,22 @@
 			<artifactId>jetlang</artifactId>
 			<version>0.2.10</version>
 		</dependency>
-
 		<!-- Needed by Kilim -->
 		<dependency>
 			<groupId>asm</groupId>
 			<artifactId>asm-all</artifactId>
 			<version>2.2.3</version>
 		</dependency>
+
+
+		<!--
 		<dependency>
-			<groupId>com.blockwithme</groupId>
-			<artifactId>kilim</artifactId>
-			<version>0.7</version>
+			<groupId>org.codehaus.groovy</groupId>
+			<artifactId>groovy</artifactId>
+			<version>2.1.2</version>
 		</dependency>
+		-->
+
 	</dependencies>
 
 	<repositories>
