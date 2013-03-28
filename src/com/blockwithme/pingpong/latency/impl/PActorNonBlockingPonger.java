@@ -61,7 +61,7 @@ public class PActorNonBlockingPonger {
     public void ping(final PActorNonBlockingPinger from,
             final ResponseProcessor<Integer> responseProcessor, final int input)
             throws Exception {
-        new PingRequest(mailbox, input).reply(from.getMailbox(),
+        new PingRequest(mailbox, input).send(from.getMailbox(),
                 responseProcessor);
     }
 }
