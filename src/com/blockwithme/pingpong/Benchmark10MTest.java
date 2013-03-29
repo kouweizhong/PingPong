@@ -36,6 +36,8 @@ import com.blockwithme.pingpong.latency.impl.JActorBlockingPinger;
 import com.blockwithme.pingpong.latency.impl.JActorBlockingPonger;
 import com.blockwithme.pingpong.latency.impl.PActorBlockingPinger;
 import com.blockwithme.pingpong.latency.impl.PActorBlockingPonger;
+import com.blockwithme.pingpong.latency.impl.PActorNonBlockingPinger;
+import com.blockwithme.pingpong.latency.impl.PActorNonBlockingPonger;
 import com.blockwithme.pingpong.latency.impl.ThreadWithBlockingQueuePinger;
 import com.blockwithme.pingpong.latency.impl.ThreadWithBlockingQueuePonger;
 import com.carrotsearch.junitbenchmarks.BenchmarkOptions;
@@ -52,7 +54,8 @@ import com.carrotsearch.junitbenchmarks.annotation.BenchmarkMethodChart;
 @BenchmarkMethodChart(filePrefix = "Benchmark10M")
 public class Benchmark10MTest extends Benchmark100MTest {
 
-    private static final boolean RUN = false;
+    /** Allows disabling the tests eaqsily. */
+    private static final boolean RUN = true;
 
     /** Setup all "services" for all test methods. */
     @Override
@@ -60,6 +63,21 @@ public class Benchmark10MTest extends Benchmark100MTest {
     public void setup() {
         super.setup();
         MESSAGES = 10000000;
+    }
+
+    /** Test with PActors, by having a reply generate the next request, to eliminate blocking. */
+    @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
+    @Test
+    public void testPActorNonBlocking() throws Exception {
+        final PActorNonBlockingPinger pinger = new PActorNonBlockingPinger(
+                paMailboxFactory.createMailbox());
+        final PActorNonBlockingPonger ponger = new PActorNonBlockingPonger(
+                paMailboxFactory.createMailbox());
+        final Integer result = pinger.hammer(ponger, MESSAGES);
+        if (result.intValue() != MESSAGES) {
+            throw new IllegalStateException("Expected " + MESSAGES
+                    + " but got " + result);
+        }
     }
 
     /** Tests using an ExecutorService. */
@@ -122,7 +140,7 @@ public class Benchmark10MTest extends Benchmark100MTest {
             final ActorRef ponger = system.actorOf(new Props(
                     AkkaBlockingPonger.class), "blockingPonger");
 
-            final Timeout timeout = new Timeout(Duration.create(60, "seconds"));
+            final Timeout timeout = new Timeout(Duration.create(300, "seconds"));
             final Future<Object> future = Patterns.ask(pinger,
                     AkkaBlockingPinger.hammer(ponger, MESSAGES), timeout);
             final Integer result = (Integer) Await.result(future,
@@ -144,7 +162,7 @@ public class Benchmark10MTest extends Benchmark100MTest {
             final ActorRef ponger = system.actorOf(new Props(
                     AkkaNonBlockingPonger.class), "nonBlockingPonger");
 
-            final Timeout timeout = new Timeout(Duration.create(60, "seconds"));
+            final Timeout timeout = new Timeout(Duration.create(300, "seconds"));
             final Future<Object> future = Patterns.ask(pinger,
                     AkkaNonBlockingPinger.hammer(ponger, MESSAGES), timeout);
             final Integer result = (Integer) Await.result(future,

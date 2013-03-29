@@ -56,6 +56,9 @@ import com.carrotsearch.junitbenchmarks.annotation.BenchmarkMethodChart;
 @SuppressWarnings("all")
 public class Benchmark100MTest extends AbstractBenchmark {
 
+    /** Allows disabling the tests eaqsily. */
+    private static final boolean RUN = true;
+
     /**
      * How many messages to send per test?
      *
@@ -173,7 +176,7 @@ public class Benchmark100MTest extends AbstractBenchmark {
     /** Test with PActors, by having a reply generate the next request, to eliminate blocking. */
     @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
-    public void testPActorNonBlocking() throws Exception {
+    public void testPActorNonBlockingSharedMailbox() throws Exception {
         final PActorNonBlockingPinger pinger = new PActorNonBlockingPinger(
                 paMailboxFactory.createMailbox());
         final PActorNonBlockingPonger ponger = new PActorNonBlockingPonger(
