@@ -56,6 +56,6 @@ public class PActorBlockingPonger {
 
     /** Sends a ping(String) request to the Ponger. Blocks and returns response. */
     public Integer ping(final int input) throws Exception {
-        return new PingRequest(mailbox, input).pend();
+        return new PingRequest(mailbox, input).call();
     }
 }

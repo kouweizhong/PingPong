@@ -69,6 +69,6 @@ public class PActorBlockingPinger {
     /** Tells the pinger to hammer the Ponger. */
     public Integer hammer(final PActorBlockingPonger ponger, final int count)
             throws Exception {
-        return new HammerRequest(mailbox, ponger, count).pend();
+        return new HammerRequest(mailbox, ponger, count).call();
     }
 }
