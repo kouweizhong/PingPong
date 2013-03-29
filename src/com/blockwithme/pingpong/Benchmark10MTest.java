@@ -49,21 +49,21 @@ import com.carrotsearch.junitbenchmarks.annotation.BenchmarkMethodChart;
  * It is in essence a latency test, not a throughput test.
  */
 @AxisRange(min = 0, max = 3)
-@BenchmarkMethodChart(filePrefix = "Benchmark1M")
-public class Benchmark1M extends Benchmark10M {
+@BenchmarkMethodChart(filePrefix = "Benchmark10M")
+public class Benchmark10MTest extends Benchmark100MTest {
 
-    private static final boolean RUN = true;
+    private static final boolean RUN = false;
 
     /** Setup all "services" for all test methods. */
     @Override
     @Before
     public void setup() {
         super.setup();
-        MESSAGES = 1000000;
+        MESSAGES = 10000000;
     }
 
     /** Tests using an ExecutorService. */
-    @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
+    @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
     public void testExecutorService() throws Exception {
         if (RUN) {
@@ -88,7 +88,7 @@ public class Benchmark1M extends Benchmark10M {
     }
 
     /** Test using Threads and blocking queues. */
-    @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
+    @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
     public void testThreadWithBlockingQueue() throws Exception {
         if (RUN) {
@@ -113,7 +113,7 @@ public class Benchmark1M extends Benchmark10M {
     }
 
     /** Test in Akka, using blocking Futures. */
-    @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
+    @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
     public void testAkkaBlocking() throws Exception {
         if (RUN) {
@@ -135,7 +135,7 @@ public class Benchmark1M extends Benchmark10M {
     }
 
     /** Test in Akka, by having a reply generate the next request, to eliminate blocking. */
-    @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
+    @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
     public void testAkkaNonBlocking() throws Exception {
         if (RUN) {
@@ -157,7 +157,7 @@ public class Benchmark1M extends Benchmark10M {
     }
 
     /** Test in JActors, using blocking Futures. */
-    @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
+    @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
     public void testJActorBlocking() throws Exception {
         if (RUN) {
@@ -174,7 +174,7 @@ public class Benchmark1M extends Benchmark10M {
     }
 
     /** Test with PActors, using the pend() method to block. */
-    @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
+    @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
     public void testPActorBlocking() throws Exception {
         if (RUN) {

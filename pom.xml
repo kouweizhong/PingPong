@@ -55,6 +55,11 @@
 						</goals>
 					</execution>
 				</executions>
+<!--
+				<configuration>
+					<forkMode>never</forkMode>
+				</configuration>
+-->
 			</plugin>
 <!--
 			<plugin>
@@ -146,7 +151,7 @@
 		<dependency>
 			<groupId>com.blockwithme</groupId>
 			<artifactId>kilim</artifactId>
-			<version>0.7</version>
+			<version>0.7.1</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>

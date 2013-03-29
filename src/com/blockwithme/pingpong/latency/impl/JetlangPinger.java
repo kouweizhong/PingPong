@@ -137,7 +137,7 @@ public class JetlangPinger {
             }
         };
         AsyncRequest.withOneReply(fiber, channel, req, onReply);
-        done.await(30, TimeUnit.SECONDS);
+        done.await(60, TimeUnit.SECONDS);
         return (Integer) response.get();
     }
 }

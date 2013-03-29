@@ -28,7 +28,6 @@ import org.junit.Test;
 
 import akka.actor.ActorSystem;
 
-import com.blockwithme.pingpong.kilim.KilimTask;
 import com.blockwithme.pingpong.latency.impl.DirectPinger;
 import com.blockwithme.pingpong.latency.impl.DirectPonger;
 import com.blockwithme.pingpong.latency.impl.JActorIteratorPinger;
@@ -53,9 +52,9 @@ import com.carrotsearch.junitbenchmarks.annotation.BenchmarkMethodChart;
  * It only tests the fastest implementations.
  */
 @AxisRange(min = 0, max = 2)
-@BenchmarkMethodChart(filePrefix = "Benchmark10M")
+@BenchmarkMethodChart(filePrefix = "Benchmark100MTest")
 @SuppressWarnings("all")
-public class Benchmark10M extends AbstractBenchmark {
+public class Benchmark100MTest extends AbstractBenchmark {
 
     /**
      * How many messages to send per test?
@@ -63,7 +62,7 @@ public class Benchmark10M extends AbstractBenchmark {
      * It must be big enough, that the direct impl takes a measurable amount
      * of time. This means that the slower Actor impl will take each several minutes to test.
      */
-    protected int MESSAGES = 10000000;
+    protected int MESSAGES = 100000000;
 
     /** The ExecutorService */
     protected ExecutorService executorService;
@@ -116,7 +115,7 @@ public class Benchmark10M extends AbstractBenchmark {
     }
 
     /** Baseline test: How fast would it go in a single thread? */
-    @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
+    @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
     public void testDirect() throws Exception {
         final DirectPinger pinger = new DirectPinger();
@@ -129,7 +128,7 @@ public class Benchmark10M extends AbstractBenchmark {
     }
 
     /** Test in JActors, using the Iterator helper class. */
-    @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
+    @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
     public void testJActorIterator() throws Exception {
         final JActorIteratorPinger pinger = new JActorIteratorPinger(
@@ -144,7 +143,7 @@ public class Benchmark10M extends AbstractBenchmark {
     }
 
     /** Test non-blocking JActor simplistic impl, which causes occasional Stack-Overflow! */
-    @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
+    @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
     public void testJActorStackOverflow() throws Exception {
         final JActorStackOverflowPinger pinger = new JActorStackOverflowPinger(
@@ -159,7 +158,7 @@ public class Benchmark10M extends AbstractBenchmark {
     }
 
     /** Test with JetLang. */
-    @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
+    @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
     public void testJetLang() throws Exception {
         final JetlangPinger pinger = new JetlangPinger(fiberPool.create());
@@ -172,7 +171,7 @@ public class Benchmark10M extends AbstractBenchmark {
     }
 
     /** Test with PActors, by having a reply generate the next request, to eliminate blocking. */
-    @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
+    @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
     public void testPActorNonBlocking() throws Exception {
         final PActorNonBlockingPinger pinger = new PActorNonBlockingPinger(
@@ -185,13 +184,18 @@ public class Benchmark10M extends AbstractBenchmark {
                     + " but got " + result);
         }
     }
-
-    /** Test with Kilim.
-     * @throws Exception */
-    @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
-    @Test
-    public void testKilimDirectTask() throws Exception {
-        KilimTask.MESSAGES = MESSAGES;
-        KilimTask.main(new String[0]);
-    }
+//
+//    /**
+//     * Test with Kilim.
+//     *
+//     * NB: This method will simply not run in Eclipse; I gewt a verify error.
+//     * I don't get it in Maven, but it runs into a dead-lock, and debugging
+//     * tests run by Maven Surefire is impossible, because it forks a new JVM
+//     * instead of running the tests in it's own JVM.
+//     */
+//    @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
+//    @Test
+//    public void testKilimDirectTask() throws Exception {
+//        KilimTask.test(MESSAGES);
+//    }
 }

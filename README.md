@@ -34,10 +34,11 @@ We are currently testing the following JVM-based actor implementations:
 In some cases, multiple variants are tested.
 
 We have a have-finished Kilim implementation. Lack of Maven support and the bytecode weaving requirement makes things a lot more difficult then for the other APIs.
-This seem to work: java -classpath lib/kilim-0.7.jar kilim.tools.Weaver target/classes -d target/kilim
-But needs to be correctly integrated in the POM.
 
 And maybe we will add Groovy actors too. But we don't plan to add anything that had no update in the last year or so.
+
+We also recently discovered: http://code.google.com/a/eclipselabs.org/p/passerelle/
+But haven't tested itz yet.
 
 Note: To get the test working locally, you will need to "mvn install" the following Github repositories:
 
