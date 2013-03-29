@@ -18,20 +18,24 @@ package com.blockwithme.pingpong.throughput;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.agilewiki.jactor.Actor;
+import org.agilewiki.jactor.JAFuture;
 import org.agilewiki.jactor.JAMailboxFactory;
+import org.agilewiki.jactor.Mailbox;
 import org.agilewiki.jactor.MailboxFactory;
 import org.agilewiki.pamailbox.DefaultMailboxFactoryImpl;
-import org.jetlang.fibers.PoolFiberFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import akka.actor.ActorSystem;
-
-import com.blockwithme.pingpong.latency.impl.JActorIteratorPinger;
-import com.blockwithme.pingpong.latency.impl.JActorIteratorPonger;
-import com.blockwithme.pingpong.latency.impl.PActorNonBlockingPinger;
-import com.blockwithme.pingpong.latency.impl.PActorNonBlockingPonger;
+import com.blockwithme.pingpong.throughput.jactor.JActorEcho;
+import com.blockwithme.pingpong.throughput.jactor.JActorParallel;
+import com.blockwithme.pingpong.throughput.jactor.JActorRealRequest;
+import com.blockwithme.pingpong.throughput.jactor.JActorSender;
+import com.blockwithme.pingpong.throughput.pactor.PActorEcho;
+import com.blockwithme.pingpong.throughput.pactor.PActorParallel;
+import com.blockwithme.pingpong.throughput.pactor.PActorRealRequest;
+import com.blockwithme.pingpong.throughput.pactor.PActorSender;
 import com.carrotsearch.junitbenchmarks.AbstractBenchmark;
 import com.carrotsearch.junitbenchmarks.BenchmarkOptions;
 import com.carrotsearch.junitbenchmarks.annotation.AxisRange;
@@ -72,8 +76,11 @@ public class ThroughputBenchmark extends AbstractBenchmark {
      */
     protected static final int PAIRS = 1000;
 
-    /** The Akka ActorSystem */
-    protected ActorSystem system;
+    /** How big should the message buffers be? */
+    protected static final int BUFFERS = 1000;
+
+    /** How many threads? */
+    protected static final int THREADS = 8;
 
     /** The JActor MailboxFactory */
     protected MailboxFactory jaMailboxFactory;
@@ -84,64 +91,124 @@ public class ThroughputBenchmark extends AbstractBenchmark {
     /** The ExecutorService */
     protected ExecutorService executorService;
 
-    /** Factory for JetLang fibers. */
-    protected PoolFiberFactory fiberPool;
-
     /** Setup all "services" for all test methods. */
     @Before
     public void setup() {
-        executorService = Executors.newFixedThreadPool(8);
-        system = ActorSystem.create("AkkaTest");
-        jaMailboxFactory = JAMailboxFactory.newMailboxFactory(8);
+        executorService = Executors.newFixedThreadPool(THREADS);
+        jaMailboxFactory = JAMailboxFactory.newMailboxFactory(THREADS);
         paMailboxFactory = new DefaultMailboxFactoryImpl(executorService, false);
-        fiberPool = new PoolFiberFactory(executorService);
     }
 
     /** Shuts down all "services" for all test methods.
      * @throws Exception */
     @After
     public void teardown() throws Exception {
-        system.shutdown();
-        system = null;
         jaMailboxFactory.close();
         jaMailboxFactory = null;
         paMailboxFactory.close();
         paMailboxFactory = null;
-        fiberPool.dispose();
-        fiberPool = null;
         if (!executorService.isShutdown()) {
             executorService.shutdownNow();
         }
         executorService = null;
     }
 
-    /** Test in JActors, using the Iterator helper class. */
-    @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
+    /** Throughput test in JActors, using async Mailboxes. */
+    @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
-    public void testJActorIterator() throws Exception {
-        final JActorIteratorPinger pinger = new JActorIteratorPinger(
-                jaMailboxFactory.createMailbox());
-        final JActorIteratorPonger ponger = new JActorIteratorPonger(
-                pinger.getMailbox());
-        final Integer result = pinger.hammer(ponger, MESSAGES);
-        if (result.intValue() != MESSAGES) {
-            throw new IllegalStateException("Expected " + MESSAGES
-                    + " but got " + result);
+    public void testJActorAsyncMailbox() throws Exception {
+        final Actor[] senders = new Actor[PAIRS];
+        int i = 0;
+        while (i < PAIRS) {
+            final Mailbox echoMailbox = jaMailboxFactory.createAsyncMailbox();
+            final JActorEcho echo = new JActorEcho();
+            echo.initialize(echoMailbox);
+            echo.setInitialBufferCapacity(BUFFERS + 10);
+            final Mailbox senderMailbox = jaMailboxFactory.createAsyncMailbox();
+            final JActorSender s = new JActorSender(echo, MESSAGES, BUFFERS);
+            s.initialize(senderMailbox);
+            senders[i] = s;
+            senders[i].setInitialBufferCapacity(BUFFERS + 10);
+            i += 1;
         }
+        final JActorParallel parallel = new JActorParallel();
+        parallel.initialize(jaMailboxFactory.createAsyncMailbox());
+        parallel.actors = senders;
+        final JAFuture future = new JAFuture();
+        JActorRealRequest.req.send(future, parallel);
     }
 
-    /** Test with PActors, by having a reply generate the next request, to eliminate blocking. */
-    @BenchmarkOptions(benchmarkRounds = 10, warmupRounds = 3)
+    /** Throughput test in JActors, using shared Mailboxes. */
+    @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
-    public void testPActorNonBlocking() throws Exception {
-        final PActorNonBlockingPinger pinger = new PActorNonBlockingPinger(
-                paMailboxFactory.createMailbox());
-        final PActorNonBlockingPonger ponger = new PActorNonBlockingPonger(
-                pinger.getMailbox());
-        final Integer result = pinger.hammer(ponger, MESSAGES);
-        if (result.intValue() != MESSAGES) {
-            throw new IllegalStateException("Expected " + MESSAGES
-                    + " but got " + result);
+    public void testJActorSharedMailbox() throws Exception {
+        final Actor[] senders = new Actor[PAIRS];
+        int i = 0;
+        while (i < PAIRS) {
+            final Mailbox echoMailbox = jaMailboxFactory.createAsyncMailbox();
+            final JActorEcho echo = new JActorEcho();
+            echo.initialize(echoMailbox);
+            echo.setInitialBufferCapacity(BUFFERS + 10);
+            final JActorSender s = new JActorSender(echo, MESSAGES, BUFFERS);
+            s.initialize(echoMailbox);
+            senders[i] = s;
+            senders[i].setInitialBufferCapacity(BUFFERS + 10);
+            i += 1;
         }
+        final JActorParallel parallel = new JActorParallel();
+        parallel.initialize(jaMailboxFactory.createMailbox());
+        parallel.actors = senders;
+        final JAFuture future = new JAFuture();
+        JActorRealRequest.req.send(future, parallel);
+    }
+
+    /** Throughput test in PActors, using async Mailboxes. */
+    @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
+    @Test
+    public void testPActorAsyncMailbox() throws Exception {
+        final PActorSender[] senders = new PActorSender[PAIRS];
+        int i = 0;
+        while (i < PAIRS) {
+            final org.agilewiki.pactor.Mailbox echoMailbox = paMailboxFactory
+                    .createMailbox(true);
+            final PActorEcho echo = new PActorEcho();
+            echo.initialize(echoMailbox);
+//            echoMailbox.setInitialBufferCapacity(BUFFERS + 10);
+            final org.agilewiki.pactor.Mailbox senderMailbox = paMailboxFactory
+                    .createMailbox(true);
+            final PActorSender s = new PActorSender(echo, MESSAGES, BUFFERS);
+            s.initialize(senderMailbox);
+            senders[i] = s;
+//            senders[i].setInitialBufferCapacity(BUFFERS + 10);
+            i += 1;
+        }
+        final PActorParallel parallel = new PActorParallel();
+        parallel.initialize(paMailboxFactory.createMailbox(true));
+        parallel.actors = senders;
+        new PActorRealRequest(parallel.getMailbox(), parallel).call();
+    }
+
+    /** Throughput test in PActors, using shared Mailboxes. */
+    @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
+    @Test
+    public void testPActorSharedMailbox() throws Exception {
+        final PActorSender[] senders = new PActorSender[PAIRS];
+        int i = 0;
+        while (i < PAIRS) {
+            final org.agilewiki.pactor.Mailbox echoMailbox = paMailboxFactory
+                    .createMailbox(true);
+            final PActorEcho echo = new PActorEcho();
+            echo.initialize(echoMailbox);
+//            echoMailbox.setInitialBufferCapacity(BUFFERS + 10);
+            final PActorSender s = new PActorSender(echo, MESSAGES, BUFFERS);
+            s.initialize(echoMailbox);
+            senders[i] = s;
+//            senders[i].setInitialBufferCapacity(BUFFERS + 10);
+            i += 1;
+        }
+        final PActorParallel parallel = new PActorParallel();
+        parallel.initialize(paMailboxFactory.createMailbox());
+        parallel.actors = senders;
+        new PActorRealRequest(parallel.getMailbox(), parallel).call();
     }
 }
