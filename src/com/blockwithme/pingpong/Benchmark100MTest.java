@@ -56,7 +56,7 @@ import com.carrotsearch.junitbenchmarks.annotation.BenchmarkMethodChart;
 @SuppressWarnings("all")
 public class Benchmark100MTest extends AbstractBenchmark {
 
-    /** Allows disabling the tests eaqsily. */
+    /** Allows disabling the tests easily. */
     private static final boolean RUN = true;
 
     /**
@@ -121,12 +121,14 @@ public class Benchmark100MTest extends AbstractBenchmark {
     @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
     public void testDirect() throws Exception {
-        final DirectPinger pinger = new DirectPinger();
-        final DirectPonger ponger = new DirectPonger();
-        final int result = pinger.hammer(ponger, MESSAGES);
-        if (result != MESSAGES) {
-            throw new IllegalStateException("Expected " + MESSAGES
-                    + " but got " + result);
+        if (RUN) {
+            final DirectPinger pinger = new DirectPinger();
+            final DirectPonger ponger = new DirectPonger();
+            final int result = pinger.hammer(ponger, MESSAGES);
+            if (result != MESSAGES) {
+                throw new IllegalStateException("Expected " + MESSAGES
+                        + " but got " + result);
+            }
         }
     }
 
@@ -134,14 +136,16 @@ public class Benchmark100MTest extends AbstractBenchmark {
     @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
     public void testJActorIterator() throws Exception {
-        final JActorIteratorPinger pinger = new JActorIteratorPinger(
-                jaMailboxFactory.createMailbox());
-        final JActorIteratorPonger ponger = new JActorIteratorPonger(
-                pinger.getMailbox());
-        final Integer result = pinger.hammer(ponger, MESSAGES);
-        if (result.intValue() != MESSAGES) {
-            throw new IllegalStateException("Expected " + MESSAGES
-                    + " but got " + result);
+        if (RUN) {
+            final JActorIteratorPinger pinger = new JActorIteratorPinger(
+                    jaMailboxFactory.createMailbox());
+            final JActorIteratorPonger ponger = new JActorIteratorPonger(
+                    pinger.getMailbox());
+            final Integer result = pinger.hammer(ponger, MESSAGES);
+            if (result.intValue() != MESSAGES) {
+                throw new IllegalStateException("Expected " + MESSAGES
+                        + " but got " + result);
+            }
         }
     }
 
@@ -149,14 +153,16 @@ public class Benchmark100MTest extends AbstractBenchmark {
     @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
     public void testJActorStackOverflow() throws Exception {
-        final JActorStackOverflowPinger pinger = new JActorStackOverflowPinger(
-                jaMailboxFactory.createMailbox());
-        final JActorStackOverflowPonger ponger = new JActorStackOverflowPonger(
-                jaMailboxFactory.createMailbox());
-        final Integer result = pinger.hammer(ponger, MESSAGES);
-        if (result.intValue() != MESSAGES) {
-            throw new IllegalStateException("Expected " + MESSAGES
-                    + " but got " + result);
+        if (RUN) {
+            final JActorStackOverflowPinger pinger = new JActorStackOverflowPinger(
+                    jaMailboxFactory.createMailbox());
+            final JActorStackOverflowPonger ponger = new JActorStackOverflowPonger(
+                    jaMailboxFactory.createMailbox());
+            final Integer result = pinger.hammer(ponger, MESSAGES);
+            if (result.intValue() != MESSAGES) {
+                throw new IllegalStateException("Expected " + MESSAGES
+                        + " but got " + result);
+            }
         }
     }
 
@@ -164,12 +170,14 @@ public class Benchmark100MTest extends AbstractBenchmark {
     @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
     public void testJetLang() throws Exception {
-        final JetlangPinger pinger = new JetlangPinger(fiberPool.create());
-        final JetlangPonger ponger = new JetlangPonger(fiberPool.create());
-        final Integer result = pinger.hammer(ponger, MESSAGES);
-        if (result.intValue() != MESSAGES) {
-            throw new IllegalStateException("Expected " + MESSAGES
-                    + " but got " + result);
+        if (RUN) {
+            final JetlangPinger pinger = new JetlangPinger(fiberPool.create());
+            final JetlangPonger ponger = new JetlangPonger(fiberPool.create());
+            final Integer result = pinger.hammer(ponger, MESSAGES);
+            if (result.intValue() != MESSAGES) {
+                throw new IllegalStateException("Expected " + MESSAGES
+                        + " but got " + result);
+            }
         }
     }
 
@@ -177,17 +185,19 @@ public class Benchmark100MTest extends AbstractBenchmark {
     @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
     public void testPActorNonBlockingSharedMailbox() throws Exception {
-        final PActorNonBlockingPinger pinger = new PActorNonBlockingPinger(
-                paMailboxFactory.createMailbox());
-        final PActorNonBlockingPonger ponger = new PActorNonBlockingPonger(
-                pinger.getMailbox());
-        final Integer result = pinger.hammer(ponger, MESSAGES);
-        if (result.intValue() != MESSAGES) {
-            throw new IllegalStateException("Expected " + MESSAGES
-                    + " but got " + result);
+        if (RUN) {
+            final PActorNonBlockingPinger pinger = new PActorNonBlockingPinger(
+                    paMailboxFactory.createMailbox());
+            final PActorNonBlockingPonger ponger = new PActorNonBlockingPonger(
+                    pinger.getMailbox());
+            final Integer result = pinger.hammer(ponger, MESSAGES);
+            if (result.intValue() != MESSAGES) {
+                throw new IllegalStateException("Expected " + MESSAGES
+                        + " but got " + result);
+            }
         }
     }
-//
+
 //    /**
 //     * Test with Kilim.
 //     *
@@ -199,6 +209,8 @@ public class Benchmark100MTest extends AbstractBenchmark {
 //    @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
 //    @Test
 //    public void testKilimDirectTask() throws Exception {
-//        KilimTask.test(MESSAGES);
+//        if (RUN) {
+//            KilimTask.test(MESSAGES);
+//        }
 //    }
 }

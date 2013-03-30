@@ -54,7 +54,7 @@ import com.carrotsearch.junitbenchmarks.annotation.BenchmarkMethodChart;
 @BenchmarkMethodChart(filePrefix = "Benchmark10M")
 public class Benchmark10MTest extends Benchmark100MTest {
 
-    /** Allows disabling the tests eaqsily. */
+    /** Allows disabling the tests easily. */
     private static final boolean RUN = true;
 
     /** Setup all "services" for all test methods. */
@@ -69,14 +69,16 @@ public class Benchmark10MTest extends Benchmark100MTest {
     @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
     public void testPActorNonBlocking() throws Exception {
-        final PActorNonBlockingPinger pinger = new PActorNonBlockingPinger(
-                paMailboxFactory.createMailbox());
-        final PActorNonBlockingPonger ponger = new PActorNonBlockingPonger(
-                paMailboxFactory.createMailbox());
-        final Integer result = pinger.hammer(ponger, MESSAGES);
-        if (result.intValue() != MESSAGES) {
-            throw new IllegalStateException("Expected " + MESSAGES
-                    + " but got " + result);
+        if (RUN) {
+            final PActorNonBlockingPinger pinger = new PActorNonBlockingPinger(
+                    paMailboxFactory.createMailbox());
+            final PActorNonBlockingPonger ponger = new PActorNonBlockingPonger(
+                    paMailboxFactory.createMailbox());
+            final Integer result = pinger.hammer(ponger, MESSAGES);
+            if (result.intValue() != MESSAGES) {
+                throw new IllegalStateException("Expected " + MESSAGES
+                        + " but got " + result);
+            }
         }
     }
 
@@ -140,7 +142,7 @@ public class Benchmark10MTest extends Benchmark100MTest {
             final ActorRef ponger = system.actorOf(new Props(
                     AkkaBlockingPonger.class), "blockingPonger");
 
-            final Timeout timeout = new Timeout(Duration.create(300, "seconds"));
+            final Timeout timeout = new Timeout(Duration.create(600, "seconds"));
             final Future<Object> future = Patterns.ask(pinger,
                     AkkaBlockingPinger.hammer(ponger, MESSAGES), timeout);
             final Integer result = (Integer) Await.result(future,
@@ -162,7 +164,7 @@ public class Benchmark10MTest extends Benchmark100MTest {
             final ActorRef ponger = system.actorOf(new Props(
                     AkkaNonBlockingPonger.class), "nonBlockingPonger");
 
-            final Timeout timeout = new Timeout(Duration.create(300, "seconds"));
+            final Timeout timeout = new Timeout(Duration.create(600, "seconds"));
             final Future<Object> future = Patterns.ask(pinger,
                     AkkaNonBlockingPinger.hammer(ponger, MESSAGES), timeout);
             final Integer result = (Integer) Await.result(future,
