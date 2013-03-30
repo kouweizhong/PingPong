@@ -32,8 +32,8 @@ import org.agilewiki.jactor.parallel.JAResponseCounter;
 /**
  * Supports parallel request processing.
  */
-final public class JAParallel extends JLPCActor implements
-        SimpleRequestReceiver, RealRequestReceiver {
+final public class JActorParallel extends JLPCActor implements
+/*JActorSimpleRequestReceiver, */JActorRealRequestReceiver {
     /**
      * The actors to be run in parallel.
      */
@@ -44,16 +44,16 @@ final public class JAParallel extends JLPCActor implements
      */
     private JAResponseCounter responseCounter;
 
-    public void run1Parallel(final Request req, final RP rd1) throws Exception {
-        final int p = actors.length;
-        responseCounter = new JAResponseCounter(p, rd1);
-        int i = 0;
-
-        while (i < p) {
-            req.send(this, actors[i], responseCounter);
-            i += 1;
-        }
-    }
+//    public void run1Parallel(final Request req, final RP rd1) throws Exception {
+//        final int p = actors.length;
+//        responseCounter = new JAResponseCounter(p, rd1);
+//        int i = 0;
+//
+//        while (i < p) {
+//            req.send(this, actors[i], responseCounter);
+//            i += 1;
+//        }
+//    }
 
     public void runParallel(final Request[] requests, final RP rd1)
             throws Exception {
@@ -70,21 +70,22 @@ final public class JAParallel extends JLPCActor implements
         }
     }
 
-    @Override
-    public void processRequest(final SimpleRequest request, final RP rp)
-            throws Exception {
-        final int p = actors.length;
-        responseCounter = new JAResponseCounter(p, rp);
-        int i = 0;
+//
+//    @Override
+//    public void processRequest(final JActorSimpleRequest request, final RP rp)
+//            throws Exception {
+//        final int p = actors.length;
+//        responseCounter = new JAResponseCounter(p, rp);
+//        int i = 0;
+//
+//        while (i < p) {
+//            send(actors[i], request, responseCounter);
+//            i += 1;
+//        }
+//    }
 
-        while (i < p) {
-            send(actors[i], request, responseCounter);
-            i += 1;
-        }
-    }
-
     @Override
-    public void processRequest(final RealRequest request, final RP rp)
+    public void processRequest(final JActorRealRequest request, final RP rp)
             throws Exception {
         final int p = actors.length;
         responseCounter = new JAResponseCounter(p, rp);

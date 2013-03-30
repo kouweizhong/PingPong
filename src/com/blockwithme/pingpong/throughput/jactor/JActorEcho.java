@@ -6,9 +6,9 @@ import org.agilewiki.jactor.lpc.JLPCActor;
 /**
  * Test code.
  */
-final public class Echo extends JLPCActor implements SimpleRequestReceiver {
+final public class JActorEcho extends JLPCActor implements JActorSimpleRequestReceiver {
     @Override
-    public void processRequest(final SimpleRequest unwrappedRequest,
+    public void processRequest(final JActorSimpleRequest unwrappedRequest,
             final RP responseProcessor) throws Exception {
         responseProcessor.processResponse(null);
     }
