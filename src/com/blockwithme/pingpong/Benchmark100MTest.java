@@ -38,6 +38,7 @@ import com.blockwithme.pingpong.latency.impl.JetlangPinger;
 import com.blockwithme.pingpong.latency.impl.JetlangPonger;
 import com.blockwithme.pingpong.latency.impl.PActorNonBlockingPinger;
 import com.blockwithme.pingpong.latency.impl.PActorNonBlockingPonger;
+import com.blockwithme.pingpong.latency.impl.kilim.KilimTask;
 import com.carrotsearch.junitbenchmarks.AbstractBenchmark;
 import com.carrotsearch.junitbenchmarks.BenchmarkOptions;
 import com.carrotsearch.junitbenchmarks.annotation.AxisRange;
@@ -59,14 +60,6 @@ public class Benchmark100MTest extends AbstractBenchmark {
     /** Allows disabling the tests eaqsily. */
     private static final boolean RUN = true;
 
-    /**
-     * How many messages to send per test?
-     *
-     * It must be big enough, that the direct impl takes a measurable amount
-     * of time. This means that the slower Actor impl will take each several minutes to test.
-     */
-    protected int MESSAGES = 100000000;
-
     /** The ExecutorService */
     protected ExecutorService executorService;
 
@@ -75,6 +68,14 @@ public class Benchmark100MTest extends AbstractBenchmark {
 
     /** The JActor MailboxFactory */
     protected MailboxFactory jaMailboxFactory;
+
+    /**
+     * How many messages to send per test?
+     *
+     * It must be big enough, that the direct impl takes a measurable amount
+     * of time. This means that the slower Actor impl will take each several minutes to test.
+     */
+    protected int MESSAGES = 100000000;
 
     /** The PActor Default MailboxFactory */
     protected DefaultMailboxFactoryImpl paMailboxFactory;
@@ -173,6 +174,15 @@ public class Benchmark100MTest extends AbstractBenchmark {
         }
     }
 
+    /**
+     * Test with Kilim
+     */
+    @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
+    @Test
+    public void testKilimDirectTask() throws Exception {
+        KilimTask.test(MESSAGES);
+    }
+
     /** Test with PActors, by having a reply generate the next request, to eliminate blocking. */
     @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
@@ -187,18 +197,4 @@ public class Benchmark100MTest extends AbstractBenchmark {
                     + " but got " + result);
         }
     }
-//
-//    /**
-//     * Test with Kilim.
-//     *
-//     * NB: This method will simply not run in Eclipse; I gewt a verify error.
-//     * I don't get it in Maven, but it runs into a dead-lock, and debugging
-//     * tests run by Maven Surefire is impossible, because it forks a new JVM
-//     * instead of running the tests in it's own JVM.
-//     */
-//    @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
-//    @Test
-//    public void testKilimDirectTask() throws Exception {
-//        KilimTask.test(MESSAGES);
-//    }
 }

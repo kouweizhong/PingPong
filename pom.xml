@@ -55,13 +55,7 @@
 						</goals>
 					</execution>
 				</executions>
-<!--
-				<configuration>
-					<forkMode>never</forkMode>
-				</configuration>
--->
 			</plugin>
-<!--
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
@@ -87,7 +81,7 @@
 					</execution>
 					<execution>
 						<id>weave test classes</id>
-						<phase>process-classes</phase>
+						<phase>process-test-classes</phase>
 						<goals>
 							<goal>exec</goal>
 						</goals>
@@ -105,7 +99,6 @@
 					</execution>
 				</executions>
 			</plugin>
- -->
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -151,7 +144,7 @@
 		<dependency>
 			<groupId>com.blockwithme</groupId>
 			<artifactId>kilim</artifactId>
-			<version>0.7.1</version>
+			<version>0.7</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -201,7 +194,6 @@
 			<artifactId>asm-all</artifactId>
 			<version>2.2.3</version>
 		</dependency>
-
 
 		<!--
 		<dependency>
