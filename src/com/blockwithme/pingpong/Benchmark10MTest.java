@@ -40,6 +40,7 @@ import com.blockwithme.pingpong.latency.impl.PActorNonBlockingPinger;
 import com.blockwithme.pingpong.latency.impl.PActorNonBlockingPonger;
 import com.blockwithme.pingpong.latency.impl.ThreadWithBlockingQueuePinger;
 import com.blockwithme.pingpong.latency.impl.ThreadWithBlockingQueuePonger;
+import com.blockwithme.pingpong.latency.impl.kilim.KilimTask;
 import com.carrotsearch.junitbenchmarks.BenchmarkOptions;
 import com.carrotsearch.junitbenchmarks.annotation.AxisRange;
 import com.carrotsearch.junitbenchmarks.annotation.BenchmarkMethodChart;
@@ -57,6 +58,30 @@ public class Benchmark10MTest extends Benchmark100MTest {
     /** Allows disabling the tests easily. */
     private static final boolean RUN = true;
 
+    /** Allows disabling the testPActorNonBlocking method easily. */
+    private static final boolean testPActorNonBlocking = RUN;
+
+    /** Allows disabling the testThreadWithBlockingQueue method easily. */
+    private static final boolean testExecutorService = RUN;
+
+    /** Allows disabling the  method easily. */
+    private static final boolean testThreadWithBlockingQueue = RUN;
+
+    /** Allows disabling the testAkkaBlocking method easily. */
+    private static final boolean testAkkaBlocking = RUN;
+
+    /** Allows disabling the testAkkaNonBlocking method easily. */
+    private static final boolean testAkkaNonBlocking = RUN;
+
+    /** Allows disabling the testJActorBlocking method easily. */
+    private static final boolean testJActorBlocking = RUN;
+
+    /** Allows disabling the testPActorBlocking method easily. */
+    private static final boolean testPActorBlocking = RUN;
+
+    /** Allows disabling the testKilimDirectTask method easily. */
+    private static final boolean testKilimDirectTask = RUN;
+
     /** Setup all "services" for all test methods. */
     @Override
     @Before
@@ -69,7 +94,7 @@ public class Benchmark10MTest extends Benchmark100MTest {
     @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
     public void testPActorNonBlocking() throws Exception {
-        if (RUN) {
+        if (testPActorNonBlocking) {
             final PActorNonBlockingPinger pinger = new PActorNonBlockingPinger(
                     paMailboxFactory.createMailbox());
             final PActorNonBlockingPonger ponger = new PActorNonBlockingPonger(
@@ -86,7 +111,7 @@ public class Benchmark10MTest extends Benchmark100MTest {
     @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
     public void testExecutorService() throws Exception {
-        if (RUN) {
+        if (testExecutorService) {
             final ExecutorServicePinger pinger = new ExecutorServicePinger(
                     executorService);
             final ExecutorServicePonger ponger = new ExecutorServicePonger(
@@ -111,7 +136,7 @@ public class Benchmark10MTest extends Benchmark100MTest {
     @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
     public void testThreadWithBlockingQueue() throws Exception {
-        if (RUN) {
+        if (testThreadWithBlockingQueue) {
             final ThreadWithBlockingQueuePinger pinger = new ThreadWithBlockingQueuePinger();
             final ThreadWithBlockingQueuePonger ponger = new ThreadWithBlockingQueuePonger();
             pinger.start();
@@ -136,7 +161,7 @@ public class Benchmark10MTest extends Benchmark100MTest {
     @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
     public void testAkkaBlocking() throws Exception {
-        if (RUN) {
+        if (testAkkaBlocking) {
             final ActorRef pinger = system.actorOf(new Props(
                     AkkaBlockingPinger.class), "blockingPinger");
             final ActorRef ponger = system.actorOf(new Props(
@@ -158,7 +183,7 @@ public class Benchmark10MTest extends Benchmark100MTest {
     @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
     public void testAkkaNonBlocking() throws Exception {
-        if (RUN) {
+        if (testAkkaNonBlocking) {
             final ActorRef pinger = system.actorOf(new Props(
                     AkkaNonBlockingPinger.class), "nonBlockingPinger");
             final ActorRef ponger = system.actorOf(new Props(
@@ -180,7 +205,7 @@ public class Benchmark10MTest extends Benchmark100MTest {
     @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
     public void testJActorBlocking() throws Exception {
-        if (RUN) {
+        if (testJActorBlocking) {
             final JActorBlockingPinger pinger = new JActorBlockingPinger(
                     jaMailboxFactory.createMailbox());
             final JActorBlockingPonger ponger = new JActorBlockingPonger(
@@ -197,13 +222,26 @@ public class Benchmark10MTest extends Benchmark100MTest {
     @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
     public void testPActorBlocking() throws Exception {
-        if (RUN) {
+        if (testPActorBlocking) {
             final PActorBlockingPinger pinger = new PActorBlockingPinger(
                     paMailboxFactory.createMailbox());
             final PActorBlockingPonger ponger = new PActorBlockingPonger(
                     paMailboxFactory.createMailbox());
             final Integer result = pinger.hammer(ponger, MESSAGES);
             if (result.intValue() != MESSAGES) {
+                throw new IllegalStateException("Expected " + MESSAGES
+                        + " but got " + result);
+            }
+        }
+    }
+
+    /** Test with Kilim */
+    @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
+    @Test
+    public void testKilimDirectTask() throws Exception {
+        if (testKilimDirectTask) {
+            final int result = KilimTask.test(MESSAGES);
+            if (result != MESSAGES) {
                 throw new IllegalStateException("Expected " + MESSAGES
                         + " but got " + result);
             }

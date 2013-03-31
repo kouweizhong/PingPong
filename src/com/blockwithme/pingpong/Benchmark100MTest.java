@@ -38,7 +38,6 @@ import com.blockwithme.pingpong.latency.impl.JetlangPinger;
 import com.blockwithme.pingpong.latency.impl.JetlangPonger;
 import com.blockwithme.pingpong.latency.impl.PActorNonBlockingPinger;
 import com.blockwithme.pingpong.latency.impl.PActorNonBlockingPonger;
-import com.blockwithme.pingpong.latency.impl.kilim.KilimTask;
 import com.carrotsearch.junitbenchmarks.AbstractBenchmark;
 import com.carrotsearch.junitbenchmarks.BenchmarkOptions;
 import com.carrotsearch.junitbenchmarks.annotation.AxisRange;
@@ -59,6 +58,21 @@ public class Benchmark100MTest extends AbstractBenchmark {
 
     /** Allows disabling the tests easily. */
     private static final boolean RUN = true;
+
+    /** Allows disabling the testDirect method easily. */
+    private static final boolean testDirect = RUN;
+
+    /** Allows disabling the testJActorIterator method easily. */
+    private static final boolean testJActorIterator = RUN;
+
+    /** Allows disabling the testJActorStackOverflow method easily. */
+    private static final boolean testJActorStackOverflow = RUN;
+
+    /** Allows disabling the testJetLang method easily. */
+    private static final boolean testJetLang = RUN;
+
+    /** Allows disabling the testPActorNonBlockingSharedMailbox method easily. */
+    private static final boolean testPActorNonBlockingSharedMailbox = RUN;
 
     /** The ExecutorService */
     protected ExecutorService executorService;
@@ -122,7 +136,7 @@ public class Benchmark100MTest extends AbstractBenchmark {
     @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
     public void testDirect() throws Exception {
-        if (RUN) {
+        if (testDirect) {
             final DirectPinger pinger = new DirectPinger();
             final DirectPonger ponger = new DirectPonger();
             final int result = pinger.hammer(ponger, MESSAGES);
@@ -137,7 +151,7 @@ public class Benchmark100MTest extends AbstractBenchmark {
     @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
     public void testJActorIterator() throws Exception {
-        if (RUN) {
+        if (testJActorIterator) {
             final JActorIteratorPinger pinger = new JActorIteratorPinger(
                     jaMailboxFactory.createMailbox());
             final JActorIteratorPonger ponger = new JActorIteratorPonger(
@@ -154,7 +168,7 @@ public class Benchmark100MTest extends AbstractBenchmark {
     @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
     public void testJActorStackOverflow() throws Exception {
-        if (RUN) {
+        if (testJActorStackOverflow) {
             final JActorStackOverflowPinger pinger = new JActorStackOverflowPinger(
                     jaMailboxFactory.createMailbox());
             final JActorStackOverflowPonger ponger = new JActorStackOverflowPonger(
@@ -171,7 +185,7 @@ public class Benchmark100MTest extends AbstractBenchmark {
     @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
     public void testJetLang() throws Exception {
-        if (RUN) {
+        if (testJetLang) {
             final JetlangPinger pinger = new JetlangPinger(fiberPool.create());
             final JetlangPonger ponger = new JetlangPonger(fiberPool.create());
             final Integer result = pinger.hammer(ponger, MESSAGES);
@@ -182,20 +196,11 @@ public class Benchmark100MTest extends AbstractBenchmark {
         }
     }
 
-    /**
-     * Test with Kilim
-     */
-    @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
-    @Test
-    public void testKilimDirectTask() throws Exception {
-        KilimTask.test(MESSAGES);
-    }
-
     /** Test with PActors, by having a reply generate the next request, to eliminate blocking. */
     @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
     public void testPActorNonBlockingSharedMailbox() throws Exception {
-        if (RUN) {
+        if (testPActorNonBlockingSharedMailbox) {
             final PActorNonBlockingPinger pinger = new PActorNonBlockingPinger(
                     paMailboxFactory.createMailbox());
             final PActorNonBlockingPonger ponger = new PActorNonBlockingPonger(

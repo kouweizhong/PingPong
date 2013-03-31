@@ -63,6 +63,18 @@ public class ThroughputBenchmarkTest extends AbstractBenchmark {
     /** Allows disabling the tests easily. */
     private static final boolean RUN = true;
 
+    /** Allows disabling the testJActorAsyncMailbox method easily. */
+    private static final boolean testJActorAsyncMailbox = RUN;
+
+    /** Allows disabling the testJActorSharedMailbox method easily. */
+    private static final boolean testJActorSharedMailbox = RUN;
+
+    /** Allows disabling the testPActorAsyncMailbox method easily. */
+    private static final boolean testPActorAsyncMailbox = RUN;
+
+    /** Allows disabling the testPActorSharedMailbox method easily. */
+    private static final boolean testPActorSharedMailbox = RUN;
+
     /**
      * How many messages to send per actor pair?
      *
@@ -120,7 +132,7 @@ public class ThroughputBenchmarkTest extends AbstractBenchmark {
     @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
     public void testJActorAsyncMailbox() throws Exception {
-        if (RUN) {
+        if (testJActorAsyncMailbox) {
             final Actor[] senders = new Actor[PAIRS];
             int i = 0;
             while (i < PAIRS) {
@@ -149,7 +161,7 @@ public class ThroughputBenchmarkTest extends AbstractBenchmark {
     @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
     public void testJActorSharedMailbox() throws Exception {
-        if (RUN) {
+        if (testJActorSharedMailbox) {
             final Actor[] senders = new Actor[PAIRS];
             int i = 0;
             while (i < PAIRS) {
@@ -176,7 +188,7 @@ public class ThroughputBenchmarkTest extends AbstractBenchmark {
     @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
     public void testPActorAsyncMailbox() throws Exception {
-        if (RUN) {
+        if (testPActorAsyncMailbox) {
             final PActorSender[] senders = new PActorSender[PAIRS];
             int i = 0;
             while (i < PAIRS) {
@@ -204,7 +216,7 @@ public class ThroughputBenchmarkTest extends AbstractBenchmark {
     @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
     public void testPActorSharedMailbox() throws Exception {
-        if (RUN) {
+        if (testPActorSharedMailbox) {
             final PActorSender[] senders = new PActorSender[PAIRS];
             int i = 0;
             while (i < PAIRS) {

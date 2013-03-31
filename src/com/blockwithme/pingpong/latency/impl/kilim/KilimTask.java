@@ -15,6 +15,8 @@
  */
 package com.blockwithme.pingpong.latency.impl.kilim;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import kilim.Pausable;
 
 /**
@@ -24,12 +26,15 @@ public class KilimTask extends kilim.Task {
 
     private static volatile int MESSAGES = 1000000;
 
-    public static void test(final int messages) throws Exception {
+    private static final AtomicInteger done = new AtomicInteger();
+
+    public static int test(final int messages) throws Exception {
 
         MESSAGES = messages;
         final KilimTask kilimTask = new KilimTask();
         kilimTask.start();
         kilimTask.joinb();
+        return done.get();
     }
 
     /** {@inheritDoc} */
@@ -42,10 +47,7 @@ public class KilimTask extends kilim.Task {
         ponger.start();
         pinger.start();
         final Integer result = pinger.hammer(MESSAGES);
-        if (result.intValue() != MESSAGES) {
-            throw new IllegalStateException("Expected " + MESSAGES
-                    + " but got " + result);
-        }
+        done.set(result == null ? 0 : result);
     }
 
 }
