@@ -33,7 +33,7 @@ import org.agilewiki.pautil.ResponseCounter;
  * Supports parallel request processing.
  */
 final public class PActorParallel extends ActorBase implements
-/*PActorSimpleRequestReceiver, */PActorRealRequestReceiver {
+        PActorRealRequestReceiver {
     /**
      * The actors to be run in parallel.
      */
@@ -43,19 +43,6 @@ final public class PActorParallel extends ActorBase implements
      * Returns a response only when the expected number of responses are received.
      */
     private ResponseCounter responseCounter;
-
-//
-//    public void run1Parallel(final Request req, final ResponseProcessor rd1)
-//            throws Exception {
-//        final int p = actors.length;
-//        responseCounter = new ResponseCounter(p, (Object) null, rd1);
-//        int i = 0;
-//
-//        while (i < p) {
-//            req.send(this, actors[i], responseCounter);
-//            i += 1;
-//        }
-//    }
 
     public void runParallel(final Request[] requests,
             final ResponseProcessor rd1) throws Exception {
@@ -73,20 +60,6 @@ final public class PActorParallel extends ActorBase implements
         }
     }
 
-//
-//    @Override
-//    public void processRequest(final PActorSimpleRequest request, final RP rp)
-//            throws Exception {
-//        final int p = actors.length;
-//        responseCounter = new JAResponseCounter(p, rp);
-//        int i = 0;
-//
-//        while (i < p) {
-//            send(actors[i], request, responseCounter);
-//            i += 1;
-//        }
-//    }
-
     @Override
     public void processRequest(final PActorRealRequest request,
             final ResponseProcessor rp) throws Exception {
@@ -96,8 +69,7 @@ final public class PActorParallel extends ActorBase implements
 
         final Mailbox mb = getMailbox();
         while (i < p) {
-            new PActorRealRequest(actors[i].getMailbox(), actors[i]).send(mb,
-                    responseCounter);
+            request.send(mb, actors[i], responseCounter);
             i += 1;
         }
     }

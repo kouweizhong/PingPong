@@ -81,7 +81,7 @@ public class ThroughputBenchmarkTest extends AbstractBenchmark {
      * It must be big enough, that the direct impl takes a measurable amount
      * of time. This means that the slower Actor impl will take each several minutes to test.
      */
-    protected static final int MESSAGES = 1000;
+    protected static final int MESSAGES = 100;
 
     /**
      * How many actors pair per test?
@@ -89,10 +89,10 @@ public class ThroughputBenchmarkTest extends AbstractBenchmark {
      * It must be big enough, that the direct impl takes a measurable amount
      * of time. This means that the slower Actor impl will take each several minutes to test.
      */
-    protected static final int PAIRS = 1000;
+    protected static final int PAIRS = 100;
 
     /** How big should the message buffers be? */
-    protected static final int BUFFERS = 1000;
+    protected static final int BUFFERS = 100;
 
     /** How many threads? */
     protected static final int THREADS = 8;
@@ -193,12 +193,12 @@ public class ThroughputBenchmarkTest extends AbstractBenchmark {
             int i = 0;
             while (i < PAIRS) {
                 final org.agilewiki.pactor.Mailbox echoMailbox = paMailboxFactory
-                        .createMailbox(true);
+                        .createMailbox();
                 final PActorEcho echo = new PActorEcho();
                 echo.initialize(echoMailbox);
 //                echoMailbox.setInitialBufferCapacity(BUFFERS + 10);
                 final org.agilewiki.pactor.Mailbox senderMailbox = paMailboxFactory
-                        .createMailbox(true);
+                        .createMailbox();
                 final PActorSender s = new PActorSender(echo, MESSAGES, BUFFERS);
                 s.initialize(senderMailbox);
                 senders[i] = s;
@@ -208,7 +208,7 @@ public class ThroughputBenchmarkTest extends AbstractBenchmark {
             final PActorParallel parallel = new PActorParallel();
             parallel.initialize(paMailboxFactory.createMailbox(true));
             parallel.actors = senders;
-            new PActorRealRequest(parallel.getMailbox(), parallel).call();
+            PActorRealRequest.req.call(parallel);
         }
     }
 
@@ -221,7 +221,7 @@ public class ThroughputBenchmarkTest extends AbstractBenchmark {
             int i = 0;
             while (i < PAIRS) {
                 final org.agilewiki.pactor.Mailbox echoMailbox = paMailboxFactory
-                        .createMailbox(true);
+                        .createMailbox();
                 final PActorEcho echo = new PActorEcho();
                 echo.initialize(echoMailbox);
 //                echoMailbox.setInitialBufferCapacity(BUFFERS + 10);
@@ -232,9 +232,9 @@ public class ThroughputBenchmarkTest extends AbstractBenchmark {
                 i += 1;
             }
             final PActorParallel parallel = new PActorParallel();
-            parallel.initialize(paMailboxFactory.createMailbox());
+            parallel.initialize(paMailboxFactory.createMailbox(true));
             parallel.actors = senders;
-            new PActorRealRequest(parallel.getMailbox(), parallel).call();
+            PActorRealRequest.req.call(parallel);
         }
     }
 }

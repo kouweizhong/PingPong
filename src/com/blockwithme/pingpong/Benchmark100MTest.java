@@ -74,6 +74,14 @@ public class Benchmark100MTest extends AbstractBenchmark {
     /** Allows disabling the testPActorNonBlockingSharedMailbox method easily. */
     private static final boolean testPActorNonBlockingSharedMailbox = RUN;
 
+    /**
+     * How many messages to send per test?
+     *
+     * It must be big enough, that the direct impl takes a measurable amount
+     * of time. This means that the slower Actor impl will take each several minutes to test.
+     */
+    protected int MESSAGES = 100000000;
+
     /** The ExecutorService */
     protected ExecutorService executorService;
 
@@ -82,14 +90,6 @@ public class Benchmark100MTest extends AbstractBenchmark {
 
     /** The JActor MailboxFactory */
     protected MailboxFactory jaMailboxFactory;
-
-    /**
-     * How many messages to send per test?
-     *
-     * It must be big enough, that the direct impl takes a measurable amount
-     * of time. This means that the slower Actor impl will take each several minutes to test.
-     */
-    protected int MESSAGES = 100000000;
 
     /** The PActor Default MailboxFactory */
     protected DefaultMailboxFactoryImpl paMailboxFactory;
@@ -202,7 +202,7 @@ public class Benchmark100MTest extends AbstractBenchmark {
     public void testPActorNonBlockingSharedMailbox() throws Exception {
         if (testPActorNonBlockingSharedMailbox) {
             final PActorNonBlockingPinger pinger = new PActorNonBlockingPinger(
-                    paMailboxFactory.createMailbox());
+                    paMailboxFactory.createMailbox(true));
             final PActorNonBlockingPonger ponger = new PActorNonBlockingPonger(
                     pinger.getMailbox());
             final Integer result = pinger.hammer(ponger, MESSAGES);
