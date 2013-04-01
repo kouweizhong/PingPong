@@ -193,16 +193,14 @@ public class ThroughputBenchmarkTest extends AbstractBenchmark {
             int i = 0;
             while (i < PAIRS) {
                 final org.agilewiki.pactor.Mailbox echoMailbox = paMailboxFactory
-                        .createMailbox();
+                        .createMailbox(BUFFERS + 10);
                 final PActorEcho echo = new PActorEcho();
                 echo.initialize(echoMailbox);
-//                echoMailbox.setInitialBufferCapacity(BUFFERS + 10);
                 final org.agilewiki.pactor.Mailbox senderMailbox = paMailboxFactory
-                        .createMailbox();
+                        .createMailbox(BUFFERS + 10);
                 final PActorSender s = new PActorSender(echo, MESSAGES, BUFFERS);
                 s.initialize(senderMailbox);
                 senders[i] = s;
-//                senders[i].setInitialBufferCapacity(BUFFERS + 10);
                 i += 1;
             }
             final PActorParallel parallel = new PActorParallel();
@@ -221,14 +219,12 @@ public class ThroughputBenchmarkTest extends AbstractBenchmark {
             int i = 0;
             while (i < PAIRS) {
                 final org.agilewiki.pactor.Mailbox echoMailbox = paMailboxFactory
-                        .createMailbox();
+                        .createMailbox(BUFFERS + 10);
                 final PActorEcho echo = new PActorEcho();
                 echo.initialize(echoMailbox);
-//                echoMailbox.setInitialBufferCapacity(BUFFERS + 10);
                 final PActorSender s = new PActorSender(echo, MESSAGES, BUFFERS);
                 s.initialize(echoMailbox);
                 senders[i] = s;
-//                senders[i].setInitialBufferCapacity(BUFFERS + 10);
                 i += 1;
             }
             final PActorParallel parallel = new PActorParallel();
