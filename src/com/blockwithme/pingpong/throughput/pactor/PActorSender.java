@@ -45,7 +45,6 @@ public class PActorSender extends ActorBase implements
                             r -= 1;
                             if (r == 0) {
                                 rd2.processResponse(null);
-                                getMailbox().flush();
                             }
                         }
                     };
@@ -56,7 +55,6 @@ public class PActorSender extends ActorBase implements
                         j += 1;
                     }
                 }
-                getMailbox().flush();
             }
         }).iterate(rd1);
     }

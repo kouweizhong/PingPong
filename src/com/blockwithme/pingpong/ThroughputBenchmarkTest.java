@@ -81,7 +81,7 @@ public class ThroughputBenchmarkTest extends AbstractBenchmark {
      * It must be big enough, that the direct impl takes a measurable amount
      * of time. This means that the slower Actor impl will take each several minutes to test.
      */
-    protected static final int MESSAGES = 100;
+    protected static final int MESSAGES = 1000;
 
     /**
      * How many actors pair per test?
@@ -89,10 +89,10 @@ public class ThroughputBenchmarkTest extends AbstractBenchmark {
      * It must be big enough, that the direct impl takes a measurable amount
      * of time. This means that the slower Actor impl will take each several minutes to test.
      */
-    protected static final int PAIRS = 100;
+    protected static final int PAIRS = 1000;
 
     /** How big should the message buffers be? */
-    protected static final int BUFFERS = 100;
+    protected static final int BUFFERS = 1000;
 
     /** How many threads? */
     protected static final int THREADS = 8;
