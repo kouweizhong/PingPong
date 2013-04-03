@@ -33,7 +33,7 @@ import org.agilewiki.jactor.parallel.JAResponseCounter;
  * Supports parallel request processing.
  */
 final public class JActorParallel extends JLPCActor implements
-/*JActorSimpleRequestReceiver, */JActorRealRequestReceiver {
+        JActorRealRequestReceiver {
     /**
      * The actors to be run in parallel.
      */
@@ -43,17 +43,6 @@ final public class JActorParallel extends JLPCActor implements
      * Returns a response only when the expected number of responses are received.
      */
     private JAResponseCounter responseCounter;
-
-//    public void run1Parallel(final Request req, final RP rd1) throws Exception {
-//        final int p = actors.length;
-//        responseCounter = new JAResponseCounter(p, rd1);
-//        int i = 0;
-//
-//        while (i < p) {
-//            req.send(this, actors[i], responseCounter);
-//            i += 1;
-//        }
-//    }
 
     public void runParallel(final Request[] requests, final RP rd1)
             throws Exception {
@@ -69,20 +58,6 @@ final public class JActorParallel extends JLPCActor implements
             i += 1;
         }
     }
-
-//
-//    @Override
-//    public void processRequest(final JActorSimpleRequest request, final RP rp)
-//            throws Exception {
-//        final int p = actors.length;
-//        responseCounter = new JAResponseCounter(p, rp);
-//        int i = 0;
-//
-//        while (i < p) {
-//            send(actors[i], request, responseCounter);
-//            i += 1;
-//        }
-//    }
 
     @Override
     public void processRequest(final JActorRealRequest request, final RP rp)

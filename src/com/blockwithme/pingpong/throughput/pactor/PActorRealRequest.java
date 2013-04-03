@@ -1,22 +1,15 @@
 package com.blockwithme.pingpong.throughput.pactor;
 
-import org.agilewiki.pactor.Mailbox;
-import org.agilewiki.pactor.RequestBase;
 import org.agilewiki.pactor.ResponseProcessor;
+import org.agilewiki.pactor.UnboundRequestBase;
 
-public class PActorRealRequest extends RequestBase<Object> {
-
-    private final PActorRealRequestReceiver target;
-
-    public PActorRealRequest(final Mailbox targetMailbox,
-            final PActorRealRequestReceiver _target) {
-        super(targetMailbox);
-        target = _target;
-    }
+public class PActorRealRequest extends
+        UnboundRequestBase<Object, PActorRealRequestReceiver> {
+    public final static PActorRealRequest req = new PActorRealRequest();
 
     @Override
-    public void processRequest(final ResponseProcessor<Object> responseProcessor)
-            throws Exception {
-        target.processRequest(this, responseProcessor);
+    public void processRequest(final PActorRealRequestReceiver _targetActor,
+            final ResponseProcessor<Object> responseProcessor) throws Exception {
+        _targetActor.processRequest(this, responseProcessor);
     }
 }
