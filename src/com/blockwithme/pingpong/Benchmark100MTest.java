@@ -110,7 +110,7 @@ public class Benchmark100MTest extends AbstractBenchmark {
         executorService = Executors.newFixedThreadPool(8);
         system = ActorSystem.create("AkkaTest");
         jaMailboxFactory = JAMailboxFactory.newMailboxFactory(8);
-        paMailboxFactory = new DefaultMailboxFactoryImpl(executorService, false);
+        paMailboxFactory = new DefaultMailboxFactoryImpl();
         fiberPool = new PoolFiberFactory(executorService);
     }
 

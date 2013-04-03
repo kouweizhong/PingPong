@@ -15,7 +15,6 @@
  */
 package com.blockwithme.pingpong;
 
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.agilewiki.jactor.Actor;
@@ -103,15 +102,11 @@ public class ThroughputBenchmarkTest extends AbstractBenchmark {
     /** The PActor Default MailboxFactory */
     protected DefaultMailboxFactoryImpl paMailboxFactory;
 
-    /** The ExecutorService */
-    protected ExecutorService executorService;
-
     /** Setup all "services" for all test methods. */
     @Before
     public void setup() {
-        executorService = Executors.newFixedThreadPool(THREADS);
         jaMailboxFactory = JAMailboxFactory.newMailboxFactory(THREADS);
-        paMailboxFactory = new DefaultMailboxFactoryImpl(executorService, false);
+        paMailboxFactory = new DefaultMailboxFactoryImpl();
     }
 
     /** Shuts down all "services" for all test methods.
@@ -122,10 +117,6 @@ public class ThroughputBenchmarkTest extends AbstractBenchmark {
         jaMailboxFactory = null;
         paMailboxFactory.close();
         paMailboxFactory = null;
-        if (!executorService.isShutdown()) {
-            executorService.shutdownNow();
-        }
-        executorService = null;
     }
 
     /** Throughput test in JActors, using async Mailboxes. */
