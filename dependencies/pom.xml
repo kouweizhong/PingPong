@@ -1,0 +1,31 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.blockwithme</groupId>
+	<artifactId>pingpongdependencies</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<name>pingpongdependencies</name>
+	<url>https://github.com/laforge49/PActor</url>
+	<modules>
+		<module>jactor</module>
+		<module>pactor</module>
+		<module>pamailbox</module>
+		<module>pautil</module>
+	</modules>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-scm-plugin</artifactId>
+				<version>1.8.1</version>
+				<configuration>
+					<goals>install</goals>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<description>Downloads and builds the dependencies for PingPong Benchmarks</description>
+</project>
