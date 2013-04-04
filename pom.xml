@@ -24,7 +24,7 @@
 	<scm>
 		<connection>scm:git:git@github.com:skunkiferous/PingPong.git</connection>
 		<developerConnection>scm:git:git@github.com:skunkiferous/PingPong.git</developerConnection>
-		<url>git@github.com:skunkiferous/PingPong.git</url>
+		<url>https://github.com/skunkiferous/PingPong.git</url>
 	</scm>
 	<developers>
 		<developer>

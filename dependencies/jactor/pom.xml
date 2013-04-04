@@ -8,12 +8,12 @@
 	<packaging>pom</packaging>
 
 	<name>jactor</name>
-	<url>https://github.com/laforge49/PActor</url>
+	<url>https://github.com/laforge49/JActor</url>
 
 	<scm>
-		<connection>scm:git:git@github.com:laforge49/JActor.git</connection>
-		<developerConnection>scm:git:git@github.com:laforge49/JActor.git</developerConnection>
-		<url>git@github.com:laforge49/JActor.git</url>
+		<connection>scm:git:https://github.com/laforge49/JActor.git</connection>
+		<developerConnection>scm:git:https://github.com/laforge49/JActor.git</developerConnection>
+		<url>https://github.com/laforge49/JActor.git</url>
 	</scm>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

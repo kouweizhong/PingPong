@@ -11,9 +11,9 @@
 	<url>https://github.com/laforge49/PAUtil</url>
 
 	<scm>
-		<connection>scm:git:git@github.com:laforge49/PAUtil.git</connection>
-		<developerConnection>scm:git:git@github.com:laforge49/PAUtil.git</developerConnection>
-		<url>git@github.com:laforge49/PAUtil.git</url>
+		<connection>scm:git:https://github.com/laforge49/PAUtil.git</connection>
+		<developerConnection>scm:git:https://github.com/laforge49/PAUtil.git</developerConnection>
+		<url>https://github.com/laforge49/PAUtil.git</url>
 	</scm>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
