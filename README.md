@@ -29,6 +29,7 @@ We are currently testing the following JVM-based actor implementations:
 * PActors: https://github.com/laforge49/PActor
 * Akka: http://akka.io/
 * JetLang: http://code.google.com/p/jetlang/
+* Kilim: http://www.malhar.net/sriram/kilim/
 * And simple threads.
 
 In some cases, multiple variants are tested.
@@ -40,11 +41,13 @@ And maybe we will add Groovy actors too. But we don't plan to add anything that 
 We also recently discovered: http://code.google.com/a/eclipselabs.org/p/passerelle/
 But haven't tested itz yet.
 
-Note: To get the test working locally, you will need to "mvn install" the following Github repositories:
+Note: To clone and install dependent projects "pom_full.xml" can be utilized via "mvn -f pom_full.xml install" command. This script clones following github repositories and installs them into your local maven repository.
 
 * https://github.com/laforge49/JActor.git
 * https://github.com/laforge49/PActor.git
 * https://github.com/laforge49/PAMailbox.git
+* https://github.com/laforge49/PAUtil
+
 
 Discussion forum:
 
