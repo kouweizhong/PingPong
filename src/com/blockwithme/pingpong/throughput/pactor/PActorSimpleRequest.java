@@ -3,6 +3,7 @@ package com.blockwithme.pingpong.throughput.pactor;
 import org.agilewiki.pactor.Mailbox;
 import org.agilewiki.pactor.RequestBase;
 import org.agilewiki.pactor.ResponseProcessor;
+import org.agilewiki.pactor.Transport;
 
 public class PActorSimpleRequest extends RequestBase<Object> {
 
@@ -15,7 +16,7 @@ public class PActorSimpleRequest extends RequestBase<Object> {
     }
 
     @Override
-    public void processRequest(final ResponseProcessor<Object> responseProcessor)
+    public void processRequest(final Transport<Object> responseProcessor)
             throws Exception {
         target.processRequest(this, responseProcessor);
     }

@@ -1,9 +1,6 @@
 package com.blockwithme.pingpong.throughput.pactor;
 
-import org.agilewiki.pactor.Mailbox;
-import org.agilewiki.pactor.Request;
-import org.agilewiki.pactor.RequestBase;
-import org.agilewiki.pactor.ResponseProcessor;
+import org.agilewiki.pactor.*;
 
 /**
  * A wrapper of an array of requests to be sent to multiple actors.
@@ -38,7 +35,7 @@ public class PActorRunParallel extends RequestBase<Object> {
     }
 
     @Override
-    public void processRequest(final ResponseProcessor<Object> responseProcessor)
+    public void processRequest(final Transport<Object> responseProcessor)
             throws Exception {
         targetActor.runParallel(requests, responseProcessor);
     }
