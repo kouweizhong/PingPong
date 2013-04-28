@@ -15,9 +15,9 @@
  */
 package com.blockwithme.pingpong.latency.impl;
 
-import org.agilewiki.pactor.Mailbox;
-import org.agilewiki.pactor.RequestBase;
-import org.agilewiki.pactor.ResponseProcessor;
+import org.agilewiki.pactor.api.Mailbox;
+import org.agilewiki.pactor.api.RequestBase;
+import org.agilewiki.pactor.api.Transport;
 
 /**
  * Receives Pings, and send Pongs back.
@@ -41,8 +41,7 @@ public class PActorBlockingPonger {
 
         /** Processes the ping(String) request, from within the Thread of the Ponger. */
         @Override
-        public void processRequest(
-                final ResponseProcessor<Integer> responseProcessor)
+        public void processRequest(final Transport<Integer> responseProcessor)
                 throws Exception {
             pings++;
             responseProcessor.processResponse(input + 1);

@@ -1,7 +1,7 @@
 package com.blockwithme.pingpong.throughput.pactor;
 
-import org.agilewiki.pactor.ActorBase;
-import org.agilewiki.pactor.ResponseProcessor;
+import org.agilewiki.pactor.api.ActorBase;
+import org.agilewiki.pactor.api.ResponseProcessor;
 
 /**
  * Test code.

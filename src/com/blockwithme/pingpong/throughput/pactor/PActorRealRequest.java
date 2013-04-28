@@ -1,7 +1,7 @@
 package com.blockwithme.pingpong.throughput.pactor;
 
-import org.agilewiki.pactor.ResponseProcessor;
-import org.agilewiki.pactor.UnboundRequestBase;
+import org.agilewiki.pactor.api.Transport;
+import org.agilewiki.pactor.api.UnboundRequestBase;
 
 public class PActorRealRequest extends
         UnboundRequestBase<Object, PActorRealRequestReceiver> {
@@ -9,7 +9,7 @@ public class PActorRealRequest extends
 
     @Override
     public void processRequest(final PActorRealRequestReceiver _targetActor,
-            final ResponseProcessor<Object> responseProcessor) throws Exception {
+            final Transport<Object> responseProcessor) throws Exception {
         _targetActor.processRequest(this, responseProcessor);
     }
 }

@@ -15,14 +15,12 @@
  */
 package com.blockwithme.pingpong;
 
-import java.util.concurrent.Executors;
-
 import org.agilewiki.jactor.Actor;
 import org.agilewiki.jactor.JAFuture;
 import org.agilewiki.jactor.JAMailboxFactory;
 import org.agilewiki.jactor.Mailbox;
 import org.agilewiki.jactor.MailboxFactory;
-import org.agilewiki.pamailbox.DefaultMailboxFactoryImpl;
+import org.agilewiki.pactor.impl.DefaultMailboxFactoryImpl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -183,11 +181,11 @@ public class ThroughputBenchmarkTest extends AbstractBenchmark {
             final PActorSender[] senders = new PActorSender[PAIRS];
             int i = 0;
             while (i < PAIRS) {
-                final org.agilewiki.pactor.Mailbox echoMailbox = paMailboxFactory
+                final org.agilewiki.pactor.api.Mailbox echoMailbox = paMailboxFactory
                         .createMailbox(BUFFERS + 10);
                 final PActorEcho echo = new PActorEcho();
                 echo.initialize(echoMailbox);
-                final org.agilewiki.pactor.Mailbox senderMailbox = paMailboxFactory
+                final org.agilewiki.pactor.api.Mailbox senderMailbox = paMailboxFactory
                         .createMailbox(BUFFERS + 10);
                 final PActorSender s = new PActorSender(echo, MESSAGES, BUFFERS);
                 s.initialize(senderMailbox);
@@ -209,7 +207,7 @@ public class ThroughputBenchmarkTest extends AbstractBenchmark {
             final PActorSender[] senders = new PActorSender[PAIRS];
             int i = 0;
             while (i < PAIRS) {
-                final org.agilewiki.pactor.Mailbox echoMailbox = paMailboxFactory
+                final org.agilewiki.pactor.api.Mailbox echoMailbox = paMailboxFactory
                         .createMailbox(BUFFERS + 10);
                 final PActorEcho echo = new PActorEcho();
                 echo.initialize(echoMailbox);

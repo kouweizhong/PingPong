@@ -23,11 +23,11 @@
  */
 package com.blockwithme.pingpong.throughput.pactor;
 
-import org.agilewiki.pactor.ActorBase;
-import org.agilewiki.pactor.Mailbox;
-import org.agilewiki.pactor.Request;
-import org.agilewiki.pactor.ResponseProcessor;
-import org.agilewiki.pautil.ResponseCounter;
+import org.agilewiki.pactor.api.ActorBase;
+import org.agilewiki.pactor.api.Mailbox;
+import org.agilewiki.pactor.api.Request;
+import org.agilewiki.pactor.api.ResponseProcessor;
+import org.agilewiki.pactor.util.ResponseCounter;
 
 /**
  * Supports parallel request processing.

@@ -15,9 +15,10 @@
  */
 package com.blockwithme.pingpong.latency.impl;
 
-import org.agilewiki.pactor.Mailbox;
-import org.agilewiki.pactor.RequestBase;
-import org.agilewiki.pactor.ResponseProcessor;
+import org.agilewiki.pactor.api.Mailbox;
+import org.agilewiki.pactor.api.RequestBase;
+import org.agilewiki.pactor.api.ResponseProcessor;
+import org.agilewiki.pactor.api.Transport;
 
 /**
  * The Pinger's job is to hammer the Ponger with ping() request.
@@ -73,8 +74,7 @@ public class PActorNonBlockingPinger {
 
         /** Process the hammer request. */
         @Override
-        public void processRequest(
-                final ResponseProcessor<Integer> _responseProcessor)
+        public void processRequest(final Transport<Integer> _responseProcessor)
                 throws Exception {
             done = 0;
             responseProcessor = _responseProcessor;
