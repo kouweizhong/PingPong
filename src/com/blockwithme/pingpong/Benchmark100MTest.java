@@ -202,7 +202,7 @@ public class Benchmark100MTest extends AbstractBenchmark {
     public void testPActorNonBlockingSharedMailbox() throws Exception {
         if (testPActorNonBlockingSharedMailbox) {
             final PActorNonBlockingPinger pinger = new PActorNonBlockingPinger(
-                    paMailboxFactory.createMailbox(true));
+                    paMailboxFactory.createMailbox(false));
             final PActorNonBlockingPonger ponger = new PActorNonBlockingPonger(
                     pinger.getMailbox());
             final Integer result = pinger.hammer(ponger, MESSAGES);

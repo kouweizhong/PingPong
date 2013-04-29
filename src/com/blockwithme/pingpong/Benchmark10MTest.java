@@ -96,9 +96,9 @@ public class Benchmark10MTest extends Benchmark100MTest {
     public void testPActorNonBlocking() throws Exception {
         if (testPActorNonBlocking) {
             final PActorNonBlockingPinger pinger = new PActorNonBlockingPinger(
-                    paMailboxFactory.createMailbox(true));
+                    paMailboxFactory.createMailbox(false));
             final PActorNonBlockingPonger ponger = new PActorNonBlockingPonger(
-                    paMailboxFactory.createMailbox(true));
+                    paMailboxFactory.createMailbox(false));
             final Integer result = pinger.hammer(ponger, MESSAGES);
             if (result.intValue() != MESSAGES) {
                 throw new IllegalStateException("Expected " + MESSAGES
