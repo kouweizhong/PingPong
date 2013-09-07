@@ -38,8 +38,12 @@ We have a have-finished Kilim implementation. Lack of Maven support and the byte
 
 And maybe we will add Groovy actors too. But we don't plan to add anything that had no update in the last year or so.
 
-We also recently discovered: http://code.google.com/a/eclipselabs.org/p/passerelle/
-But haven't tested itz yet.
+We also recently discovered the following APIs, which might get some benchmarks too, eventually:
+
+* http://code.google.com/a/eclipselabs.org/p/passerelle/
+* https://github.com/puniverse/quasar
+* http://gpars.codehaus.org/
+
 
 Note: To clone and install dependent projects "pom_full.xml" can be utilized via "mvn -f pom_full.xml install" command. This script clones following github repositories and installs them into your local maven repository.
 

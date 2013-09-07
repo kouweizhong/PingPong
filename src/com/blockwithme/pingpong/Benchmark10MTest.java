@@ -15,6 +15,8 @@
  */
 package com.blockwithme.pingpong;
 
+import org.agilewiki.jactor2.core.processing.IsolationMessageProcessor;
+import org.agilewiki.jactor2.core.processing.NonBlockingMessageProcessor;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -32,12 +34,12 @@ import com.blockwithme.pingpong.latency.impl.AkkaNonBlockingPinger;
 import com.blockwithme.pingpong.latency.impl.AkkaNonBlockingPonger;
 import com.blockwithme.pingpong.latency.impl.ExecutorServicePinger;
 import com.blockwithme.pingpong.latency.impl.ExecutorServicePonger;
+import com.blockwithme.pingpong.latency.impl.JActor2BlockingPinger;
+import com.blockwithme.pingpong.latency.impl.JActor2BlockingPonger;
+import com.blockwithme.pingpong.latency.impl.JActor2NonBlockingPinger;
+import com.blockwithme.pingpong.latency.impl.JActor2NonBlockingPonger;
 import com.blockwithme.pingpong.latency.impl.JActorBlockingPinger;
 import com.blockwithme.pingpong.latency.impl.JActorBlockingPonger;
-import com.blockwithme.pingpong.latency.impl.PActorBlockingPinger;
-import com.blockwithme.pingpong.latency.impl.PActorBlockingPonger;
-import com.blockwithme.pingpong.latency.impl.PActorNonBlockingPinger;
-import com.blockwithme.pingpong.latency.impl.PActorNonBlockingPonger;
 import com.blockwithme.pingpong.latency.impl.ThreadWithBlockingQueuePinger;
 import com.blockwithme.pingpong.latency.impl.ThreadWithBlockingQueuePonger;
 import com.blockwithme.pingpong.latency.impl.kilim.KilimTask;
@@ -55,11 +57,14 @@ import com.carrotsearch.junitbenchmarks.annotation.BenchmarkMethodChart;
 @BenchmarkMethodChart(filePrefix = "Benchmark10M")
 public class Benchmark10MTest extends Benchmark100MTest {
 
+    /** Default number of messages */
+    protected static final int DEFAULT_MESSAGES = Benchmark100MTest.DEFAULT_MESSAGES / 10;
+
     /** Allows disabling the tests easily. */
     private static final boolean RUN = true;
 
-    /** Allows disabling the testPActorNonBlocking method easily. */
-    private static final boolean testPActorNonBlocking = RUN;
+    /** Allows disabling the testJActor2NonBlocking method easily. */
+    private static final boolean testJActor2NonBlocking = false;
 
     /** Allows disabling the testThreadWithBlockingQueue method easily. */
     private static final boolean testExecutorService = RUN;
@@ -76,8 +81,8 @@ public class Benchmark10MTest extends Benchmark100MTest {
     /** Allows disabling the testJActorBlocking method easily. */
     private static final boolean testJActorBlocking = RUN;
 
-    /** Allows disabling the testPActorBlocking method easily. */
-    private static final boolean testPActorBlocking = RUN;
+    /** Allows disabling the testJActor2Blocking method easily. */
+    private static final boolean testJActor2Blocking = RUN;
 
     /** Allows disabling the testKilimDirectTask method easily. */
     private static final boolean testKilimDirectTask = RUN;
@@ -87,18 +92,18 @@ public class Benchmark10MTest extends Benchmark100MTest {
     @Before
     public void setup() {
         super.setup();
-        MESSAGES = 10000000;
+        MESSAGES = DEFAULT_MESSAGES;
     }
 
-    /** Test with PActors, by having a reply generate the next request, to eliminate blocking. */
+    /** Test with JActor2s, by having a reply generate the next request, to eliminate blocking. */
     @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
-    public void testPActorNonBlocking() throws Exception {
-        if (testPActorNonBlocking) {
-            final PActorNonBlockingPinger pinger = new PActorNonBlockingPinger(
-                    paMailboxFactory.createMailbox(false));
-            final PActorNonBlockingPonger ponger = new PActorNonBlockingPonger(
-                    paMailboxFactory.createMailbox(false));
+    public void testJActor2NonBlocking() throws Exception {
+        if (testJActor2NonBlocking) {
+            final JActor2NonBlockingPinger pinger = new JActor2NonBlockingPinger(
+                    new NonBlockingMessageProcessor(ja2ModuleContext));
+            final JActor2NonBlockingPonger ponger = new JActor2NonBlockingPonger(
+                    new NonBlockingMessageProcessor(ja2ModuleContext));
             final Integer result = pinger.hammer(ponger, MESSAGES);
             if (result.intValue() != MESSAGES) {
                 throw new IllegalStateException("Expected " + MESSAGES
@@ -218,15 +223,15 @@ public class Benchmark10MTest extends Benchmark100MTest {
         }
     }
 
-    /** Test with PActors, using the pend() method to block. */
+    /** Test with JActor2s, using the pend() method to block. */
     @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
-    public void testPActorBlocking() throws Exception {
-        if (testPActorBlocking) {
-            final PActorBlockingPinger pinger = new PActorBlockingPinger(
-                    paMailboxFactory.createMailbox());
-            final PActorBlockingPonger ponger = new PActorBlockingPonger(
-                    paMailboxFactory.createMailbox());
+    public void testJActor2Blocking() throws Exception {
+        if (testJActor2Blocking) {
+            final JActor2BlockingPinger pinger = new JActor2BlockingPinger(
+                    new IsolationMessageProcessor(ja2ModuleContext));
+            final JActor2BlockingPonger ponger = new JActor2BlockingPonger(
+                    new IsolationMessageProcessor(ja2ModuleContext));
             final Integer result = pinger.hammer(ponger, MESSAGES);
             if (result.intValue() != MESSAGES) {
                 throw new IllegalStateException("Expected " + MESSAGES

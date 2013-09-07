@@ -21,23 +21,23 @@
  * A copy of this license is also included and can be
  * found as well at http://www.opensource.org/licenses/cpl1.0.txt
  */
-package com.blockwithme.pingpong.throughput.pactor;
+package com.blockwithme.pingpong.throughput.jactor2;
 
-import org.agilewiki.pactor.api.ActorBase;
-import org.agilewiki.pactor.api.Mailbox;
-import org.agilewiki.pactor.api.Request;
-import org.agilewiki.pactor.api.ResponseProcessor;
-import org.agilewiki.pactor.util.ResponseCounter;
+import org.agilewiki.jactor2.core.ActorBase;
+import org.agilewiki.jactor2.core.messaging.Request;
+import org.agilewiki.jactor2.core.messaging.ResponseCounter;
+import org.agilewiki.jactor2.core.messaging.ResponseProcessor;
+import org.agilewiki.jactor2.core.processing.MessageProcessor;
 
 /**
  * Supports parallel request processing.
  */
-final public class PActorParallel extends ActorBase implements
-        PActorRealRequestReceiver {
+final public class JActor2Parallel extends ActorBase implements
+        JActor2RealRequestReceiver {
     /**
      * The actors to be run in parallel.
      */
-    public PActorRealRequestReceiver[] actors;
+    public JActor2RealRequestReceiver[] actors;
 
     /**
      * Returns a response only when the expected number of responses are received.
@@ -53,7 +53,7 @@ final public class PActorParallel extends ActorBase implements
         if (requests.length != p)
             throw new IllegalArgumentException(
                     "Request and actor arrays not the same length");
-        final Mailbox mb = getMailbox();
+        final MessageProcessor mb = getMessageProcessor();
         while (i < p) {
             requests[i].send(mb, responseCounter);
             i += 1;
@@ -61,15 +61,15 @@ final public class PActorParallel extends ActorBase implements
     }
 
     @Override
-    public void processRequest(final PActorRealRequest request,
+    public void processRequest(final JActor2RealRequest request,
             final ResponseProcessor rp) throws Exception {
         final int p = actors.length;
         responseCounter = new ResponseCounter(p, (Object) null, rp);
         int i = 0;
 
-        final Mailbox mb = getMailbox();
+        final MessageProcessor mb = getMessageProcessor();
         while (i < p) {
-            request.send(mb, actors[i], responseCounter);
+//            request.send(mb, actors[i], responseCounter);
             i += 1;
         }
     }

@@ -20,7 +20,8 @@ import java.util.concurrent.Executors;
 
 import org.agilewiki.jactor.JAMailboxFactory;
 import org.agilewiki.jactor.MailboxFactory;
-import org.agilewiki.pactor.impl.DefaultMailboxFactoryImpl;
+import org.agilewiki.jactor2.core.processing.NonBlockingMessageProcessor;
+import org.agilewiki.jactor2.core.threading.ModuleContext;
 import org.jetlang.fibers.PoolFiberFactory;
 import org.junit.After;
 import org.junit.Before;
@@ -30,14 +31,14 @@ import akka.actor.ActorSystem;
 
 import com.blockwithme.pingpong.latency.impl.DirectPinger;
 import com.blockwithme.pingpong.latency.impl.DirectPonger;
+import com.blockwithme.pingpong.latency.impl.JActor2NonBlockingPinger;
+import com.blockwithme.pingpong.latency.impl.JActor2NonBlockingPonger;
 import com.blockwithme.pingpong.latency.impl.JActorIteratorPinger;
 import com.blockwithme.pingpong.latency.impl.JActorIteratorPonger;
 import com.blockwithme.pingpong.latency.impl.JActorStackOverflowPinger;
 import com.blockwithme.pingpong.latency.impl.JActorStackOverflowPonger;
 import com.blockwithme.pingpong.latency.impl.JetlangPinger;
 import com.blockwithme.pingpong.latency.impl.JetlangPonger;
-import com.blockwithme.pingpong.latency.impl.PActorNonBlockingPinger;
-import com.blockwithme.pingpong.latency.impl.PActorNonBlockingPonger;
 import com.carrotsearch.junitbenchmarks.AbstractBenchmark;
 import com.carrotsearch.junitbenchmarks.BenchmarkOptions;
 import com.carrotsearch.junitbenchmarks.annotation.AxisRange;
@@ -71,8 +72,11 @@ public class Benchmark100MTest extends AbstractBenchmark {
     /** Allows disabling the testJetLang method easily. */
     private static final boolean testJetLang = RUN;
 
-    /** Allows disabling the testPActorNonBlockingSharedMailbox method easily. */
-    private static final boolean testPActorNonBlockingSharedMailbox = RUN;
+    /** Allows disabling the testJActor2NonBlockingSharedMailbox method easily. */
+    private static final boolean testJActor2NonBlockingSharedMailbox = RUN;
+
+    /** Default number of messages */
+    protected static final int DEFAULT_MESSAGES = 1000000;//100000000;
 
     /**
      * How many messages to send per test?
@@ -80,7 +84,7 @@ public class Benchmark100MTest extends AbstractBenchmark {
      * It must be big enough, that the direct impl takes a measurable amount
      * of time. This means that the slower Actor impl will take each several minutes to test.
      */
-    protected int MESSAGES = 100000000;
+    protected int MESSAGES = DEFAULT_MESSAGES;
 
     /** The ExecutorService */
     protected ExecutorService executorService;
@@ -91,8 +95,8 @@ public class Benchmark100MTest extends AbstractBenchmark {
     /** The JActor MailboxFactory */
     protected MailboxFactory jaMailboxFactory;
 
-    /** The PActor Default MailboxFactory */
-    protected DefaultMailboxFactoryImpl paMailboxFactory;
+    /** The JActor2 Default MailboxFactory */
+    protected ModuleContext ja2ModuleContext;
 
     /** The Akka ActorSystem */
     protected ActorSystem system;
@@ -110,7 +114,7 @@ public class Benchmark100MTest extends AbstractBenchmark {
         executorService = Executors.newFixedThreadPool(8);
         system = ActorSystem.create("AkkaTest");
         jaMailboxFactory = JAMailboxFactory.newMailboxFactory(8);
-        paMailboxFactory = new DefaultMailboxFactoryImpl();
+        ja2ModuleContext = new ModuleContext(8);
         fiberPool = new PoolFiberFactory(executorService);
     }
 
@@ -122,8 +126,8 @@ public class Benchmark100MTest extends AbstractBenchmark {
         system = null;
         jaMailboxFactory.close();
         jaMailboxFactory = null;
-        paMailboxFactory.close();
-        paMailboxFactory = null;
+        ja2ModuleContext.close();
+        ja2ModuleContext = null;
         fiberPool.dispose();
         fiberPool = null;
         if (!executorService.isShutdown()) {
@@ -196,14 +200,14 @@ public class Benchmark100MTest extends AbstractBenchmark {
         }
     }
 
-    /** Test with PActors, by having a reply generate the next request, to eliminate blocking. */
+    /** Test with JActor2s, by having a reply generate the next request, to eliminate blocking. */
     @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
-    public void testPActorNonBlockingSharedMailbox() throws Exception {
-        if (testPActorNonBlockingSharedMailbox) {
-            final PActorNonBlockingPinger pinger = new PActorNonBlockingPinger(
-                    paMailboxFactory.createMailbox(false));
-            final PActorNonBlockingPonger ponger = new PActorNonBlockingPonger(
+    public void testJActor2NonBlockingSharedMailbox() throws Exception {
+        if (testJActor2NonBlockingSharedMailbox) {
+            final JActor2NonBlockingPinger pinger = new JActor2NonBlockingPinger(
+                    new NonBlockingMessageProcessor(ja2ModuleContext));
+            final JActor2NonBlockingPonger ponger = new JActor2NonBlockingPonger(
                     pinger.getMailbox());
             final Integer result = pinger.hammer(ponger, MESSAGES);
             if (result.intValue() != MESSAGES) {

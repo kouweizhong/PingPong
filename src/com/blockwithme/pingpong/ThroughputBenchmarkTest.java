@@ -20,7 +20,8 @@ import org.agilewiki.jactor.JAFuture;
 import org.agilewiki.jactor.JAMailboxFactory;
 import org.agilewiki.jactor.Mailbox;
 import org.agilewiki.jactor.MailboxFactory;
-import org.agilewiki.pactor.impl.DefaultMailboxFactoryImpl;
+import org.agilewiki.jactor2.core.processing.IsolationMessageProcessor;
+import org.agilewiki.jactor2.core.threading.ModuleContext;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,10 +30,10 @@ import com.blockwithme.pingpong.throughput.jactor.JActorEcho;
 import com.blockwithme.pingpong.throughput.jactor.JActorParallel;
 import com.blockwithme.pingpong.throughput.jactor.JActorRealRequest;
 import com.blockwithme.pingpong.throughput.jactor.JActorSender;
-import com.blockwithme.pingpong.throughput.pactor.PActorEcho;
-import com.blockwithme.pingpong.throughput.pactor.PActorParallel;
-import com.blockwithme.pingpong.throughput.pactor.PActorRealRequest;
-import com.blockwithme.pingpong.throughput.pactor.PActorSender;
+import com.blockwithme.pingpong.throughput.jactor2.JActor2Echo;
+import com.blockwithme.pingpong.throughput.jactor2.JActor2Parallel;
+import com.blockwithme.pingpong.throughput.jactor2.JActor2RealRequest;
+import com.blockwithme.pingpong.throughput.jactor2.JActor2Sender;
 import com.carrotsearch.junitbenchmarks.AbstractBenchmark;
 import com.carrotsearch.junitbenchmarks.BenchmarkOptions;
 import com.carrotsearch.junitbenchmarks.annotation.AxisRange;
@@ -66,11 +67,11 @@ public class ThroughputBenchmarkTest extends AbstractBenchmark {
     /** Allows disabling the testJActorSharedMailbox method easily. */
     private static final boolean testJActorSharedMailbox = RUN;
 
-    /** Allows disabling the testPActorAsyncMailbox method easily. */
-    private static final boolean testPActorAsyncMailbox = RUN;
+    /** Allows disabling the testJActor2AsyncMailbox method easily. */
+    private static final boolean testJActor2AsyncMailbox = RUN;
 
-    /** Allows disabling the testPActorSharedMailbox method easily. */
-    private static final boolean testPActorSharedMailbox = RUN;
+    /** Allows disabling the testJActor2SharedMailbox method easily. */
+    private static final boolean testJActor2SharedMailbox = RUN;
 
     /**
      * How many messages to send per actor pair?
@@ -97,14 +98,14 @@ public class ThroughputBenchmarkTest extends AbstractBenchmark {
     /** The JActor MailboxFactory */
     protected MailboxFactory jaMailboxFactory;
 
-    /** The PActor Default MailboxFactory */
-    protected DefaultMailboxFactoryImpl paMailboxFactory;
+    /** The JActor2 Default MailboxFactory */
+    protected ModuleContext paMailboxFactory;
 
     /** Setup all "services" for all test methods. */
     @Before
     public void setup() {
         jaMailboxFactory = JAMailboxFactory.newMailboxFactory(THREADS);
-        paMailboxFactory = new DefaultMailboxFactoryImpl();
+        paMailboxFactory = new ModuleContext();
     }
 
     /** Shuts down all "services" for all test methods.
@@ -173,53 +174,58 @@ public class ThroughputBenchmarkTest extends AbstractBenchmark {
         }
     }
 
-    /** Throughput test in PActors, using async Mailboxes. */
+    /** Throughput test in JActor2s, using async Mailboxes. */
     @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
-    public void testPActorAsyncMailbox() throws Exception {
-        if (testPActorAsyncMailbox) {
-            final PActorSender[] senders = new PActorSender[PAIRS];
+    public void testJActor2AsyncMailbox() throws Exception {
+        if (testJActor2AsyncMailbox) {
+            final JActor2Sender[] senders = new JActor2Sender[PAIRS];
             int i = 0;
             while (i < PAIRS) {
-                final org.agilewiki.pactor.api.Mailbox echoMailbox = paMailboxFactory
-                        .createMailbox(BUFFERS + 10);
-                final PActorEcho echo = new PActorEcho();
+                final org.agilewiki.jactor2.core.processing.MessageProcessor echoMailbox = new IsolationMessageProcessor(
+                        paMailboxFactory
+                /*BUFFERS + 10*/);
+                final JActor2Echo echo = new JActor2Echo();
                 echo.initialize(echoMailbox);
-                final org.agilewiki.pactor.api.Mailbox senderMailbox = paMailboxFactory
-                        .createMailbox(BUFFERS + 10);
-                final PActorSender s = new PActorSender(echo, MESSAGES, BUFFERS);
+                final org.agilewiki.jactor2.core.processing.MessageProcessor senderMailbox = new IsolationMessageProcessor(
+                        paMailboxFactory/*BUFFERS + 10*/);
+                final JActor2Sender s = new JActor2Sender(echo, MESSAGES,
+                        BUFFERS);
                 s.initialize(senderMailbox);
                 senders[i] = s;
                 i += 1;
             }
-            final PActorParallel parallel = new PActorParallel();
-            parallel.initialize(paMailboxFactory.createMailbox(true));
+            final JActor2Parallel parallel = new JActor2Parallel();
+            parallel.initialize(new IsolationMessageProcessor(paMailboxFactory));
             parallel.actors = senders;
-            PActorRealRequest.req.call(parallel);
+            new JActor2RealRequest(new IsolationMessageProcessor(
+                    paMailboxFactory), parallel).call();
         }
     }
 
-    /** Throughput test in PActors, using shared Mailboxes. */
+    /** Throughput test in JActor2s, using shared Mailboxes. */
     @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
-    public void testPActorSharedMailbox() throws Exception {
-        if (testPActorSharedMailbox) {
-            final PActorSender[] senders = new PActorSender[PAIRS];
+    public void testJActor2SharedMailbox() throws Exception {
+        if (testJActor2SharedMailbox) {
+            final JActor2Sender[] senders = new JActor2Sender[PAIRS];
             int i = 0;
             while (i < PAIRS) {
-                final org.agilewiki.pactor.api.Mailbox echoMailbox = paMailboxFactory
-                        .createMailbox(BUFFERS + 10);
-                final PActorEcho echo = new PActorEcho();
+                final org.agilewiki.jactor2.core.processing.MessageProcessor echoMailbox = new IsolationMessageProcessor(
+                        paMailboxFactory/*BUFFERS + 10*/);
+                final JActor2Echo echo = new JActor2Echo();
                 echo.initialize(echoMailbox);
-                final PActorSender s = new PActorSender(echo, MESSAGES, BUFFERS);
+                final JActor2Sender s = new JActor2Sender(echo, MESSAGES,
+                        BUFFERS);
                 s.initialize(echoMailbox);
                 senders[i] = s;
                 i += 1;
             }
-            final PActorParallel parallel = new PActorParallel();
-            parallel.initialize(paMailboxFactory.createMailbox(true));
+            final JActor2Parallel parallel = new JActor2Parallel();
+            parallel.initialize(new IsolationMessageProcessor(paMailboxFactory));
             parallel.actors = senders;
-            PActorRealRequest.req.call(parallel);
+            new JActor2RealRequest(new IsolationMessageProcessor(
+                    paMailboxFactory), parallel).call();
         }
     }
 }

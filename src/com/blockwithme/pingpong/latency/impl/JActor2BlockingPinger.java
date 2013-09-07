@@ -15,29 +15,28 @@
  */
 package com.blockwithme.pingpong.latency.impl;
 
-import org.agilewiki.pactor.api.Mailbox;
-import org.agilewiki.pactor.api.RequestBase;
-import org.agilewiki.pactor.api.Transport;
+import org.agilewiki.jactor2.core.messaging.Request;
+import org.agilewiki.jactor2.core.processing.MessageProcessor;
 
 /**
  * The Pinger's job is to hammer the Ponger with ping() request.
- * Implemented with PActor, blocks on ping() using pend().
+ * Implemented with JActor2, blocks on ping() using pend().
  */
-public class PActorBlockingPinger {
+public class JActor2BlockingPinger {
     /** The Pinger's mailbox. */
-    private final Mailbox mailbox;
+    private final MessageProcessor mailbox;
 
     /** A Hammer request, targeted at Pinger. */
-    private class HammerRequest extends RequestBase<Integer> {
+    private class HammerRequest extends Request<Integer> {
         /** The Ponger to hammer. */
-        private final PActorBlockingPonger ponger;
+        private final JActor2BlockingPonger ponger;
 
         /** The number of exchanges to do. */
         private final int count;
 
         /** Creates a hammer request, with the targeted Ponger. */
-        public HammerRequest(final Mailbox mbox,
-                final PActorBlockingPonger _ponger, final int _count) {
+        public HammerRequest(final MessageProcessor mbox,
+                final JActor2BlockingPonger _ponger, final int _count) {
             super(mbox);
             ponger = _ponger;
             count = _count;
@@ -45,8 +44,7 @@ public class PActorBlockingPinger {
 
         /** Process the hammer request. */
         @Override
-        public void processRequest(final Transport<Integer> responseProcessor)
-                throws Exception {
+        public void processRequest() throws Exception {
             int done = 0;
             while (done < count) {
                 final Integer response = ponger.ping(done);
@@ -56,17 +54,17 @@ public class PActorBlockingPinger {
                             + " but got " + response);
                 }
             }
-            responseProcessor.processResponse(done);
+            processResponse(done);
         }
     }
 
     /** Creates a Pinger, with it's own mailbox and name. */
-    public PActorBlockingPinger(final Mailbox mbox) {
+    public JActor2BlockingPinger(final MessageProcessor mbox) {
         mailbox = mbox;
     }
 
     /** Tells the pinger to hammer the Ponger. */
-    public Integer hammer(final PActorBlockingPonger ponger, final int count)
+    public Integer hammer(final JActor2BlockingPonger ponger, final int count)
             throws Exception {
         return new HammerRequest(mailbox, ponger, count).call();
     }

@@ -15,53 +15,44 @@
  */
 package com.blockwithme.pingpong.latency.impl;
 
-import org.agilewiki.pactor.api.Mailbox;
-import org.agilewiki.pactor.api.RequestBase;
-import org.agilewiki.pactor.api.ResponseProcessor;
-import org.agilewiki.pactor.api.Transport;
+import org.agilewiki.jactor2.core.messaging.Request;
+import org.agilewiki.jactor2.core.processing.MessageProcessor;
 
 /**
  * Receives Pings, and send Pongs back.
- *
- * Implemented using PActor, by having the processing of the reply create the
- * next request, therefore not needing blocking.
+ * Implemented with JActor2s.
  */
-public class PActorNonBlockingPonger {
+public class JActor2BlockingPonger {
     /** Ponger mailbox */
-    private final Mailbox mailbox;
+    private final MessageProcessor mailbox;
 
     /** Some mutable data of Ponger, which must be access in a thread-safe way. */
     private int pings;
 
     /** A Ping request, targeted at Ponger. */
-    private class PingRequest extends RequestBase<Integer> {
-        /** Some state needed to process the request. */
+    private class PingRequest extends Request<Integer> {
         private final int input;
 
-        /** Creates a Ping request. */
-        public PingRequest(final Mailbox mbox, final int _input) {
+        public PingRequest(final MessageProcessor mbox, final int _input) {
             super(mbox);
             input = _input;
         }
 
         /** Processes the ping(String) request, from within the Thread of the Ponger. */
         @Override
-        public void processRequest(final Transport<Integer> responseProcessor)
-                throws Exception {
-            responseProcessor.processResponse(input + 1);
+        public void processRequest() throws Exception {
+            pings++;
+            processResponse(input + 1);
         }
     }
 
     /** Creates a Ponger, with it's own mailbox. */
-    public PActorNonBlockingPonger(final Mailbox mbox) {
+    public JActor2BlockingPonger(final MessageProcessor mbox) {
         mailbox = mbox;
     }
 
-    /** Sends a ping(String) request to the Ponger. */
-    public void ping(final PActorNonBlockingPinger from,
-            final ResponseProcessor<Integer> responseProcessor, final int input)
-            throws Exception {
-        new PingRequest(mailbox, input).send(from.getMailbox(),
-                responseProcessor);
+    /** Sends a ping(String) request to the Ponger. Blocks and returns response. */
+    public Integer ping(final int input) throws Exception {
+        return new PingRequest(mailbox, input).call();
     }
 }

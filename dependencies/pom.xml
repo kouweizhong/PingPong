@@ -11,9 +11,7 @@
 	<url>https://github.com/skunkiferous/PingPong</url>
 	<modules>
 		<module>jactor</module>
-		<module>pactor</module>
-		<module>pamailbox</module>
-		<module>pautil</module>
+		<module>jactor2</module>
 	</modules>
 	<build>
 		<plugins>

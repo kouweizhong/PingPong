@@ -15,24 +15,23 @@
  */
 package com.blockwithme.pingpong.latency.impl;
 
-import org.agilewiki.pactor.api.Mailbox;
-import org.agilewiki.pactor.api.RequestBase;
-import org.agilewiki.pactor.api.ResponseProcessor;
-import org.agilewiki.pactor.api.Transport;
+import org.agilewiki.jactor2.core.messaging.Request;
+import org.agilewiki.jactor2.core.messaging.ResponseProcessor;
+import org.agilewiki.jactor2.core.processing.MessageProcessor;
 
 /**
  * The Pinger's job is to hammer the Ponger with ping() request.
- * This impl uses PActor, and generates request while processing reply, to eliminate blocking.
+ * This impl uses JActor2, and generates request while processing reply, to eliminate blocking.
  */
-public class PActorNonBlockingPinger {
+public class JActor2NonBlockingPinger {
 
     /** The Pinger's mailbox. */
-    private final Mailbox mailbox;
+    private final MessageProcessor mailbox;
 
     /** A Hammer request, targeted at Pinger. */
-    private class HammerRequest extends RequestBase<Integer> {
+    private class HammerRequest extends Request<Integer> {
         /** The Ponger to hammer. */
-        private final PActorNonBlockingPonger ponger;
+        private final JActor2NonBlockingPonger ponger;
 
         /** The number of exchanges to do. */
         private final int count;
@@ -40,12 +39,9 @@ public class PActorNonBlockingPinger {
         /** The number of pings sent. */
         private int done;
 
-        /** ResponseProcessor for benchmark results */
-        private ResponseProcessor<Integer> responseProcessor;
-
         /** Creates a hammer request, with the targeted Ponger. */
-        public HammerRequest(final Mailbox mbox,
-                final PActorNonBlockingPonger _ponger, final int _count) {
+        public HammerRequest(final MessageProcessor mbox,
+                final JActor2NonBlockingPonger _ponger, final int _count) {
             super(mbox);
             ponger = _ponger;
             count = _count;
@@ -55,7 +51,7 @@ public class PActorNonBlockingPinger {
         private void ping() throws Exception {
             done++;
             if (done < count) {
-                ponger.ping(PActorNonBlockingPinger.this,
+                ponger.ping(JActor2NonBlockingPinger.this,
                         new ResponseProcessor<Integer>() {
                             @Override
                             public void processResponse(final Integer response)
@@ -68,28 +64,26 @@ public class PActorNonBlockingPinger {
                             }
                         }, done);
             } else {
-                responseProcessor.processResponse(done);
+                processResponse(done);
             }
         }
 
         /** Process the hammer request. */
         @Override
-        public void processRequest(final Transport<Integer> _responseProcessor)
-                throws Exception {
+        public void processRequest() throws Exception {
             done = 0;
-            responseProcessor = _responseProcessor;
             // Send first ping, to get the "virtual loop" going
             ping();
         }
     }
 
     /** Creates a Pinger, with it's own mailbox and name. */
-    public PActorNonBlockingPinger(final Mailbox mbox) {
+    public JActor2NonBlockingPinger(final MessageProcessor mbox) {
         mailbox = mbox;
     }
 
     /** Tells the pinger to hammer the Ponger. */
-    public Integer hammer(final PActorNonBlockingPonger ponger, final int count)
+    public Integer hammer(final JActor2NonBlockingPonger ponger, final int count)
             throws Exception {
         return new HammerRequest(getMailbox(), ponger, count).call();
     }
@@ -97,7 +91,7 @@ public class PActorNonBlockingPinger {
     /**
      * @return the mailbox
      */
-    public Mailbox getMailbox() {
+    public MessageProcessor getMailbox() {
         return mailbox;
     }
 }
