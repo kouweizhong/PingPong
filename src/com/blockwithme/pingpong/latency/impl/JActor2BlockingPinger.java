@@ -15,7 +15,7 @@
  */
 package com.blockwithme.pingpong.latency.impl;
 
-import org.agilewiki.jactor2.core.messaging.Request;
+import org.agilewiki.jactor2.core.messaging.AsyncRequest;
 import org.agilewiki.jactor2.core.processing.MessageProcessor;
 
 /**
@@ -27,7 +27,7 @@ public class JActor2BlockingPinger {
     private final MessageProcessor mailbox;
 
     /** A Hammer request, targeted at Pinger. */
-    private class HammerRequest extends Request<Integer> {
+    private class HammerRequest extends AsyncRequest<Integer> {
         /** The Ponger to hammer. */
         private final JActor2BlockingPonger ponger;
 
@@ -44,7 +44,7 @@ public class JActor2BlockingPinger {
 
         /** Process the hammer request. */
         @Override
-        public void processRequest() throws Exception {
+        public void processAsyncRequest() throws Exception {
             int done = 0;
             while (done < count) {
                 final Integer response = ponger.ping(done);
@@ -54,7 +54,7 @@ public class JActor2BlockingPinger {
                             + " but got " + response);
                 }
             }
-            processResponse(done);
+            processAsyncResponse(done);
         }
     }
 

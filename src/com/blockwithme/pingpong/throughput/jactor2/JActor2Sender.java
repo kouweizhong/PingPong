@@ -1,7 +1,7 @@
 package com.blockwithme.pingpong.throughput.jactor2;
 
 import org.agilewiki.jactor2.core.ActorBase;
-import org.agilewiki.jactor2.core.messaging.ResponseProcessor;
+import org.agilewiki.jactor2.core.messaging.AsyncResponseProcessor;
 
 /**
  * Test code.
@@ -23,7 +23,7 @@ public class JActor2Sender extends ActorBase implements
 
     @Override
     public void processRequest(final JActor2RealRequest unwrappedRequest,
-            final ResponseProcessor rd1) throws Exception {
+            final AsyncResponseProcessor rd1) throws Exception {
         final boolean real = unwrappedRequest != null;
 //        (new JAIterator() {
 //            int i;

@@ -61,10 +61,10 @@ public class Benchmark10MTest extends Benchmark100MTest {
     protected static final int DEFAULT_MESSAGES = Benchmark100MTest.DEFAULT_MESSAGES / 10;
 
     /** Allows disabling the tests easily. */
-    private static final boolean RUN = true;
+    private static final boolean RUN = false;
 
     /** Allows disabling the testJActor2NonBlocking method easily. */
-    private static final boolean testJActor2NonBlocking = false;
+    private static final boolean testJActor2NonBlocking = true;
 
     /** Allows disabling the testThreadWithBlockingQueue method easily. */
     private static final boolean testExecutorService = RUN;

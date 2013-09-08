@@ -15,8 +15,8 @@
  */
 package com.blockwithme.pingpong.latency.impl;
 
-import org.agilewiki.jactor2.core.messaging.Request;
-import org.agilewiki.jactor2.core.messaging.ResponseProcessor;
+import org.agilewiki.jactor2.core.messaging.AsyncRequest;
+import org.agilewiki.jactor2.core.messaging.AsyncResponseProcessor;
 import org.agilewiki.jactor2.core.processing.MessageProcessor;
 
 /**
@@ -32,8 +32,13 @@ public class JActor2NonBlockingPonger {
     /** Some mutable data of Ponger, which must be access in a thread-safe way. */
     private int pings;
 
+    private volatile String STATE = "Ponger() CREATED";
+
+    private volatile PingRequest LAST_PING;
+
     /** A Ping request, targeted at Ponger. */
-    private class PingRequest extends Request<Integer> {
+    private class PingRequest extends AsyncRequest<Integer> {
+        private volatile String STATE = "CREATED";
         /** Some state needed to process the request. */
         private final int input;
 
@@ -41,12 +46,17 @@ public class JActor2NonBlockingPonger {
         public PingRequest(final MessageProcessor mbox, final int _input) {
             super(mbox);
             input = _input;
+            STATE = "PingRequest(" + input + ") CREATED";
         }
 
         /** Processes the ping(String) request, from within the Thread of the Ponger. */
         @Override
-        public void processRequest() throws Exception {
-            processResponse(input + 1);
+        public void processAsyncRequest() throws Exception {
+            STATE = "PingRequest(" + input + ") BEFORE processResponse("
+                    + (input + 1) + ")";
+            processAsyncResponse(input + 1);
+            STATE = "PingRequest(" + input + ") AFTER processResponse("
+                    + (input + 1) + ")";
         }
     }
 
@@ -57,9 +67,13 @@ public class JActor2NonBlockingPonger {
 
     /** Sends a ping(String) request to the Ponger. */
     public void ping(final JActor2NonBlockingPinger from,
-            final ResponseProcessor<Integer> responseProcessor, final int input)
-            throws Exception {
-        new PingRequest(mailbox, input).send(from.getMailbox(),
-                responseProcessor);
+            final AsyncResponseProcessor<Integer> responseProcessor,
+            final int input) throws Exception {
+        STATE = "Ponger() GOT ping(" + input + ") CALL";
+        final PingRequest ping = new PingRequest(mailbox, input);
+        LAST_PING = ping;
+        ping.send(from.getMailbox(), responseProcessor);
+        STATE = "Ponger() SENT ping(" + input
+                + ") REQUEST / WAITING FOR RESPONSE";
     }
 }

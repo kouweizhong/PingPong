@@ -16,9 +16,7 @@
 package com.blockwithme.pingpong;
 
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-import org.agilewiki.jactor.JAMailboxFactory;
 import org.agilewiki.jactor.MailboxFactory;
 import org.agilewiki.jactor2.core.processing.NonBlockingMessageProcessor;
 import org.agilewiki.jactor2.core.threading.ModuleContext;
@@ -58,7 +56,7 @@ import com.carrotsearch.junitbenchmarks.annotation.BenchmarkMethodChart;
 public class Benchmark100MTest extends AbstractBenchmark {
 
     /** Allows disabling the tests easily. */
-    private static final boolean RUN = true;
+    private static final boolean RUN = false;
 
     /** Allows disabling the testDirect method easily. */
     private static final boolean testDirect = RUN;
@@ -73,10 +71,10 @@ public class Benchmark100MTest extends AbstractBenchmark {
     private static final boolean testJetLang = RUN;
 
     /** Allows disabling the testJActor2NonBlockingSharedMailbox method easily. */
-    private static final boolean testJActor2NonBlockingSharedMailbox = RUN;
+    private static final boolean testJActor2NonBlockingSharedMailbox = true;
 
     /** Default number of messages */
-    protected static final int DEFAULT_MESSAGES = 1000000;//100000000;
+    protected static final int DEFAULT_MESSAGES = 10000000;//100000000;
 
     /**
      * How many messages to send per test?
@@ -111,28 +109,28 @@ public class Benchmark100MTest extends AbstractBenchmark {
     /** Setup all "services" for all test methods. */
     @Before
     public void setup() {
-        executorService = Executors.newFixedThreadPool(8);
-        system = ActorSystem.create("AkkaTest");
-        jaMailboxFactory = JAMailboxFactory.newMailboxFactory(8);
-        ja2ModuleContext = new ModuleContext(8);
-        fiberPool = new PoolFiberFactory(executorService);
+//        executorService = Executors.newFixedThreadPool(8);
+//        system = ActorSystem.create("AkkaTest");
+//        jaMailboxFactory = JAMailboxFactory.newMailboxFactory(8);
+        ja2ModuleContext = new ModuleContext(2);
+//        fiberPool = new PoolFiberFactory(executorService);
     }
 
     /** Shuts down all "services" for all test methods.
      * @throws Exception */
     @After
     public void teardown() throws Exception {
-        system.shutdown();
+//        system.shutdown();
         system = null;
-        jaMailboxFactory.close();
+//        jaMailboxFactory.close();
         jaMailboxFactory = null;
         ja2ModuleContext.close();
         ja2ModuleContext = null;
-        fiberPool.dispose();
+//        fiberPool.dispose();
         fiberPool = null;
-        if (!executorService.isShutdown()) {
-            executorService.shutdownNow();
-        }
+//        if (!executorService.isShutdown()) {
+//            executorService.shutdownNow();
+//        }
         executorService = null;
     }
 

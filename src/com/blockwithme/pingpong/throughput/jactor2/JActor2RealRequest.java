@@ -1,9 +1,9 @@
 package com.blockwithme.pingpong.throughput.jactor2;
 
-import org.agilewiki.jactor2.core.messaging.Request;
+import org.agilewiki.jactor2.core.messaging.AsyncRequest;
 import org.agilewiki.jactor2.core.processing.MessageProcessor;
 
-public class JActor2RealRequest extends Request<Object> {
+public class JActor2RealRequest extends AsyncRequest<Object> {
     final JActor2RealRequestReceiver _targetActor;
 
     /**
@@ -16,7 +16,7 @@ public class JActor2RealRequest extends Request<Object> {
     }
 
     @Override
-    public void processRequest() throws Exception {
+    public void processAsyncRequest() throws Exception {
         _targetActor.processRequest(this, this);
     }
 }

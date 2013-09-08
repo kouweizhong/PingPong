@@ -24,9 +24,9 @@
 package com.blockwithme.pingpong.throughput.jactor2;
 
 import org.agilewiki.jactor2.core.ActorBase;
-import org.agilewiki.jactor2.core.messaging.Request;
+import org.agilewiki.jactor2.core.messaging.AsyncRequest;
+import org.agilewiki.jactor2.core.messaging.AsyncResponseProcessor;
 import org.agilewiki.jactor2.core.messaging.ResponseCounter;
-import org.agilewiki.jactor2.core.messaging.ResponseProcessor;
 import org.agilewiki.jactor2.core.processing.MessageProcessor;
 
 /**
@@ -44,8 +44,8 @@ final public class JActor2Parallel extends ActorBase implements
      */
     private ResponseCounter responseCounter;
 
-    public void runParallel(final Request[] requests,
-            final ResponseProcessor rd1) throws Exception {
+    public void runParallel(final AsyncRequest[] requests,
+            final AsyncResponseProcessor rd1) throws Exception {
         final int p = actors.length;
         responseCounter = new ResponseCounter(p, (Object) null, rd1);
         int i = 0;
@@ -62,7 +62,7 @@ final public class JActor2Parallel extends ActorBase implements
 
     @Override
     public void processRequest(final JActor2RealRequest request,
-            final ResponseProcessor rp) throws Exception {
+            final AsyncResponseProcessor rp) throws Exception {
         final int p = actors.length;
         responseCounter = new ResponseCounter(p, (Object) null, rp);
         int i = 0;

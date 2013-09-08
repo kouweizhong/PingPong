@@ -15,8 +15,8 @@
  */
 package com.blockwithme.pingpong.latency.impl;
 
-import org.agilewiki.jactor2.core.messaging.Request;
-import org.agilewiki.jactor2.core.messaging.ResponseProcessor;
+import org.agilewiki.jactor2.core.messaging.AsyncRequest;
+import org.agilewiki.jactor2.core.messaging.AsyncResponseProcessor;
 import org.agilewiki.jactor2.core.processing.MessageProcessor;
 
 /**
@@ -25,11 +25,16 @@ import org.agilewiki.jactor2.core.processing.MessageProcessor;
  */
 public class JActor2NonBlockingPinger {
 
+    private volatile String STATE = "Pinger() CREATED";
+
     /** The Pinger's mailbox. */
     private final MessageProcessor mailbox;
 
     /** A Hammer request, targeted at Pinger. */
-    private class HammerRequest extends Request<Integer> {
+    private class HammerRequest extends AsyncRequest<Integer> {
+
+        private volatile String STATE = "HammerRequest() CREATED";
+
         /** The Ponger to hammer. */
         private final JActor2NonBlockingPonger ponger;
 
@@ -45,32 +50,48 @@ public class JActor2NonBlockingPinger {
             super(mbox);
             ponger = _ponger;
             count = _count;
+            STATE = "HammerRequest(" + count + ") CREATED";
         }
 
         /** Send a ping, unless we're done, in which case tell caller we are done. */
         private void ping() throws Exception {
             done++;
             if (done < count) {
+                STATE = "HammerRequest(" + count + ") GOT PING. done=" + done
+                        + " PINGING SOME MORE ...";
                 ponger.ping(JActor2NonBlockingPinger.this,
-                        new ResponseProcessor<Integer>() {
+                        new AsyncResponseProcessor<Integer>() {
                             @Override
-                            public void processResponse(final Integer response)
-                                    throws Exception {
+                            public void processAsyncResponse(
+                                    final Integer response) throws Exception {
                                 if (response.intValue() != done + 1) {
+                                    STATE = "HammerRequest(" + count
+                                            + ") GOT RESPONSE " + response
+                                            + " BUT EXPECTED " + (done + 1)
+                                            + " FAILING!";
                                     throw new IllegalStateException("Expected "
                                             + done + " but got " + response);
                                 }
+                                STATE = "HammerRequest(" + count
+                                        + ") GOT RESPONSE " + response
+                                        + " ONE MORE PING ...";
                                 ping();
                             }
                         }, done);
             } else {
-                processResponse(done);
+                STATE = "HammerRequest(" + count + ") GOT PING. done=" + done
+                        + " SENDING RESPONSE ...";
+                processAsyncResponse(done);
+                STATE = "HammerRequest(" + count + ") GOT PING. done=" + done
+                        + " RESPONSE SENT";
             }
         }
 
         /** Process the hammer request. */
         @Override
-        public void processRequest() throws Exception {
+        public void processAsyncRequest() throws Exception {
+            STATE = "HammerRequest(" + count
+                    + ") GOT processRequest(). STARTING ping()s ...";
             done = 0;
             // Send first ping, to get the "virtual loop" going
             ping();
@@ -85,7 +106,12 @@ public class JActor2NonBlockingPinger {
     /** Tells the pinger to hammer the Ponger. */
     public Integer hammer(final JActor2NonBlockingPonger ponger, final int count)
             throws Exception {
-        return new HammerRequest(getMailbox(), ponger, count).call();
+        final HammerRequest hammer = new HammerRequest(getMailbox(), ponger,
+                count);
+        STATE = "HammerRequest() BEFORE HammerRequest(" + count + ").call()";
+        final Integer result = hammer.call();
+        STATE = "HammerRequest() AFTER HammerRequest(" + count + ").call()";
+        return result;
     }
 
     /**

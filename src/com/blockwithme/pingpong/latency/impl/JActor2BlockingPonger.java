@@ -15,7 +15,7 @@
  */
 package com.blockwithme.pingpong.latency.impl;
 
-import org.agilewiki.jactor2.core.messaging.Request;
+import org.agilewiki.jactor2.core.messaging.AsyncRequest;
 import org.agilewiki.jactor2.core.processing.MessageProcessor;
 
 /**
@@ -30,7 +30,7 @@ public class JActor2BlockingPonger {
     private int pings;
 
     /** A Ping request, targeted at Ponger. */
-    private class PingRequest extends Request<Integer> {
+    private class PingRequest extends AsyncRequest<Integer> {
         private final int input;
 
         public PingRequest(final MessageProcessor mbox, final int _input) {
@@ -40,9 +40,9 @@ public class JActor2BlockingPonger {
 
         /** Processes the ping(String) request, from within the Thread of the Ponger. */
         @Override
-        public void processRequest() throws Exception {
+        public void processAsyncRequest() throws Exception {
             pings++;
-            processResponse(input + 1);
+            processAsyncResponse(input + 1);
         }
     }
 
