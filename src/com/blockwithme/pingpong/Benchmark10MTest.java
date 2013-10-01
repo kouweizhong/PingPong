@@ -15,8 +15,6 @@
  */
 package com.blockwithme.pingpong;
 
-import org.agilewiki.jactor2.core.processing.IsolationMessageProcessor;
-import org.agilewiki.jactor2.core.processing.NonBlockingMessageProcessor;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -34,10 +32,6 @@ import com.blockwithme.pingpong.latency.impl.AkkaNonBlockingPinger;
 import com.blockwithme.pingpong.latency.impl.AkkaNonBlockingPonger;
 import com.blockwithme.pingpong.latency.impl.ExecutorServicePinger;
 import com.blockwithme.pingpong.latency.impl.ExecutorServicePonger;
-import com.blockwithme.pingpong.latency.impl.JActor2BlockingPinger;
-import com.blockwithme.pingpong.latency.impl.JActor2BlockingPonger;
-import com.blockwithme.pingpong.latency.impl.JActor2NonBlockingPinger;
-import com.blockwithme.pingpong.latency.impl.JActor2NonBlockingPonger;
 import com.blockwithme.pingpong.latency.impl.JActorBlockingPinger;
 import com.blockwithme.pingpong.latency.impl.JActorBlockingPonger;
 import com.blockwithme.pingpong.latency.impl.ThreadWithBlockingQueuePinger;
@@ -63,9 +57,6 @@ public class Benchmark10MTest extends Benchmark100MTest {
     /** Allows disabling the tests easily. */
     private static final boolean RUN = false;
 
-    /** Allows disabling the testJActor2NonBlocking method easily. */
-    private static final boolean testJActor2NonBlocking = true;
-
     /** Allows disabling the testThreadWithBlockingQueue method easily. */
     private static final boolean testExecutorService = RUN;
 
@@ -81,9 +72,6 @@ public class Benchmark10MTest extends Benchmark100MTest {
     /** Allows disabling the testJActorBlocking method easily. */
     private static final boolean testJActorBlocking = RUN;
 
-    /** Allows disabling the testJActor2Blocking method easily. */
-    private static final boolean testJActor2Blocking = RUN;
-
     /** Allows disabling the testKilimDirectTask method easily. */
     private static final boolean testKilimDirectTask = RUN;
 
@@ -93,23 +81,6 @@ public class Benchmark10MTest extends Benchmark100MTest {
     public void setup() {
         super.setup();
         MESSAGES = DEFAULT_MESSAGES;
-    }
-
-    /** Test with JActor2s, by having a reply generate the next request, to eliminate blocking. */
-    @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
-    @Test
-    public void testJActor2NonBlocking() throws Exception {
-        if (testJActor2NonBlocking) {
-            final JActor2NonBlockingPinger pinger = new JActor2NonBlockingPinger(
-                    new NonBlockingMessageProcessor(ja2ModuleContext));
-            final JActor2NonBlockingPonger ponger = new JActor2NonBlockingPonger(
-                    new NonBlockingMessageProcessor(ja2ModuleContext));
-            final Integer result = pinger.hammer(ponger, MESSAGES);
-            if (result.intValue() != MESSAGES) {
-                throw new IllegalStateException("Expected " + MESSAGES
-                        + " but got " + result);
-            }
-        }
     }
 
     /** Tests using an ExecutorService. */
@@ -215,23 +186,6 @@ public class Benchmark10MTest extends Benchmark100MTest {
                     jaMailboxFactory.createMailbox());
             final JActorBlockingPonger ponger = new JActorBlockingPonger(
                     jaMailboxFactory.createMailbox());
-            final Integer result = pinger.hammer(ponger, MESSAGES);
-            if (result.intValue() != MESSAGES) {
-                throw new IllegalStateException("Expected " + MESSAGES
-                        + " but got " + result);
-            }
-        }
-    }
-
-    /** Test with JActor2s, using the pend() method to block. */
-    @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
-    @Test
-    public void testJActor2Blocking() throws Exception {
-        if (testJActor2Blocking) {
-            final JActor2BlockingPinger pinger = new JActor2BlockingPinger(
-                    new IsolationMessageProcessor(ja2ModuleContext));
-            final JActor2BlockingPonger ponger = new JActor2BlockingPonger(
-                    new IsolationMessageProcessor(ja2ModuleContext));
             final Integer result = pinger.hammer(ponger, MESSAGES);
             if (result.intValue() != MESSAGES) {
                 throw new IllegalStateException("Expected " + MESSAGES

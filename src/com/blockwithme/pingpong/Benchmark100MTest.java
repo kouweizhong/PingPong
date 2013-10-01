@@ -18,8 +18,6 @@ package com.blockwithme.pingpong;
 import java.util.concurrent.ExecutorService;
 
 import org.agilewiki.jactor.MailboxFactory;
-import org.agilewiki.jactor2.core.processing.NonBlockingMessageProcessor;
-import org.agilewiki.jactor2.core.threading.ModuleContext;
 import org.jetlang.fibers.PoolFiberFactory;
 import org.junit.After;
 import org.junit.Before;
@@ -29,8 +27,6 @@ import akka.actor.ActorSystem;
 
 import com.blockwithme.pingpong.latency.impl.DirectPinger;
 import com.blockwithme.pingpong.latency.impl.DirectPonger;
-import com.blockwithme.pingpong.latency.impl.JActor2NonBlockingPinger;
-import com.blockwithme.pingpong.latency.impl.JActor2NonBlockingPonger;
 import com.blockwithme.pingpong.latency.impl.JActorIteratorPinger;
 import com.blockwithme.pingpong.latency.impl.JActorIteratorPonger;
 import com.blockwithme.pingpong.latency.impl.JActorStackOverflowPinger;
@@ -93,9 +89,6 @@ public class Benchmark100MTest extends AbstractBenchmark {
     /** The JActor MailboxFactory */
     protected MailboxFactory jaMailboxFactory;
 
-    /** The JActor2 Default MailboxFactory */
-    protected ModuleContext ja2ModuleContext;
-
     /** The Akka ActorSystem */
     protected ActorSystem system;
 
@@ -112,7 +105,6 @@ public class Benchmark100MTest extends AbstractBenchmark {
 //        executorService = Executors.newFixedThreadPool(8);
 //        system = ActorSystem.create("AkkaTest");
 //        jaMailboxFactory = JAMailboxFactory.newMailboxFactory(8);
-        ja2ModuleContext = new ModuleContext(2);
 //        fiberPool = new PoolFiberFactory(executorService);
     }
 
@@ -124,8 +116,6 @@ public class Benchmark100MTest extends AbstractBenchmark {
         system = null;
 //        jaMailboxFactory.close();
         jaMailboxFactory = null;
-        ja2ModuleContext.close();
-        ja2ModuleContext = null;
 //        fiberPool.dispose();
         fiberPool = null;
 //        if (!executorService.isShutdown()) {
@@ -190,23 +180,6 @@ public class Benchmark100MTest extends AbstractBenchmark {
         if (testJetLang) {
             final JetlangPinger pinger = new JetlangPinger(fiberPool.create());
             final JetlangPonger ponger = new JetlangPonger(fiberPool.create());
-            final Integer result = pinger.hammer(ponger, MESSAGES);
-            if (result.intValue() != MESSAGES) {
-                throw new IllegalStateException("Expected " + MESSAGES
-                        + " but got " + result);
-            }
-        }
-    }
-
-    /** Test with JActor2s, by having a reply generate the next request, to eliminate blocking. */
-    @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
-    @Test
-    public void testJActor2NonBlockingSharedMailbox() throws Exception {
-        if (testJActor2NonBlockingSharedMailbox) {
-            final JActor2NonBlockingPinger pinger = new JActor2NonBlockingPinger(
-                    new NonBlockingMessageProcessor(ja2ModuleContext));
-            final JActor2NonBlockingPonger ponger = new JActor2NonBlockingPonger(
-                    pinger.getMailbox());
             final Integer result = pinger.hammer(ponger, MESSAGES);
             if (result.intValue() != MESSAGES) {
                 throw new IllegalStateException("Expected " + MESSAGES

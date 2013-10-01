@@ -142,9 +142,9 @@
 	<dependencies>
 		<!-- Benchmark API dependencies -->
 		<dependency>
-			<groupId>com.blockwithme</groupId>
+			<groupId>kilim</groupId>
 			<artifactId>kilim</artifactId>
-			<version>0.7</version>
+			<version>1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -177,12 +177,12 @@
 		<dependency>
 			<groupId>org.agilewiki.jactor2</groupId>
 			<artifactId>jactor2-core</artifactId>
-			<version>0.0.5-SNAPSHOT</version>
+			<version>0.3.3</version>
 		</dependency>
 		<dependency>
-			<groupId>com.typesafe.akka</groupId>
-			<artifactId>akka-actor_2.10</artifactId>
-			<version>2.2-M1</version>
+    		<groupId>com.typesafe.akka</groupId>
+    		<artifactId>akka-actor_2.10</artifactId>
+    		<version>2.2.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jetlang</groupId>
@@ -190,11 +190,11 @@
 			<version>0.2.10</version>
 		</dependency>
 		<!-- Needed by Kilim -->
-		<dependency>
+		<!-- <dependency>
 			<groupId>asm</groupId>
 			<artifactId>asm-all</artifactId>
 			<version>2.2.3</version>
-		</dependency>
+		</dependency>-->
 
 		<!--
 		<dependency>

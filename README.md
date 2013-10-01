@@ -26,7 +26,7 @@ We use http://labs.carrotsearch.com/junit-benchmarks.html for the benchmark impl
 We are currently testing the following JVM-based actor implementations:
 
 * JActors: https://github.com/laforge49/JActor
-* PActors: https://github.com/laforge49/PActor
+* JActor2: https://github.com/laforge49/JActor2
 * Akka: http://akka.io/
 * JetLang: http://code.google.com/p/jetlang/
 * Kilim: http://www.malhar.net/sriram/kilim/
@@ -48,9 +48,7 @@ We also recently discovered the following APIs, which might get some benchmarks 
 Note: To clone and install dependent projects "pom_full.xml" can be utilized via "mvn -f pom_full.xml install" command. This script clones following github repositories and installs them into your local maven repository.
 
 * https://github.com/laforge49/JActor.git
-* https://github.com/laforge49/PActor.git
-* https://github.com/laforge49/PAMailbox.git
-* https://github.com/laforge49/PAUtil
+* https://github.com/laforge49/JActor2.git
 
 
 Discussion forum:
