@@ -53,19 +53,13 @@ public class ThroughputBenchmarkTest extends AbstractBenchmark {
     }
 
     /** Allows disabling the tests easily. */
-    private static final boolean RUN = true;
+    private static final boolean RUN = false;
 
     /** Allows disabling the testJActorAsyncMailbox method easily. */
     private static final boolean testJActorAsyncMailbox = RUN;
 
     /** Allows disabling the testJActorSharedMailbox method easily. */
     private static final boolean testJActorSharedMailbox = RUN;
-
-    /** Allows disabling the testJActor2AsyncMailbox method easily. */
-    private static final boolean testJActor2AsyncMailbox = RUN;
-
-    /** Allows disabling the testJActor2SharedMailbox method easily. */
-    private static final boolean testJActor2SharedMailbox = RUN;
 
     /**
      * How many messages to send per actor pair?

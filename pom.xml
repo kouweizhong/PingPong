@@ -12,7 +12,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.blockwithme</groupId>
 	<artifactId>PingPong</artifactId>
-	<version>0.0.1</version>
+	<version>0.0.2</version>
 	<packaging>jar</packaging>
 	<name>PingPong</name>
 	<description>Shows how to implement a simple request-reply example using multiple Java Actor APIs, as a benchmark.</description>

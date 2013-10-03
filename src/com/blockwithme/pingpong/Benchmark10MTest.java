@@ -15,6 +15,8 @@
  */
 package com.blockwithme.pingpong;
 
+import org.agilewiki.jactor2.core.reactors.IsolationReactor;
+import org.agilewiki.jactor2.core.reactors.NonBlockingReactor;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -32,6 +34,8 @@ import com.blockwithme.pingpong.latency.impl.AkkaNonBlockingPinger;
 import com.blockwithme.pingpong.latency.impl.AkkaNonBlockingPonger;
 import com.blockwithme.pingpong.latency.impl.ExecutorServicePinger;
 import com.blockwithme.pingpong.latency.impl.ExecutorServicePonger;
+import com.blockwithme.pingpong.latency.impl.JActor2NonBlockingPinger;
+import com.blockwithme.pingpong.latency.impl.JActor2NonBlockingPonger;
 import com.blockwithme.pingpong.latency.impl.JActorBlockingPinger;
 import com.blockwithme.pingpong.latency.impl.JActorBlockingPonger;
 import com.blockwithme.pingpong.latency.impl.ThreadWithBlockingQueuePinger;
@@ -55,30 +59,37 @@ public class Benchmark10MTest extends Benchmark100MTest {
     protected static final int DEFAULT_MESSAGES = Benchmark100MTest.DEFAULT_MESSAGES / 10;
 
     /** Allows disabling the tests easily. */
-    private static final boolean RUN = false;
+    private static final boolean RUN = true;
 
     /** Allows disabling the testThreadWithBlockingQueue method easily. */
-    private static final boolean testExecutorService = RUN;
+    public static final boolean testExecutorService = RUN;
 
     /** Allows disabling the  method easily. */
-    private static final boolean testThreadWithBlockingQueue = RUN;
+    public static final boolean testThreadWithBlockingQueue = RUN;
 
     /** Allows disabling the testAkkaBlocking method easily. */
-    private static final boolean testAkkaBlocking = RUN;
+    public static final boolean testAkkaBlocking = RUN;
 
     /** Allows disabling the testAkkaNonBlocking method easily. */
-    private static final boolean testAkkaNonBlocking = RUN;
+    public static final boolean testAkkaNonBlocking = RUN;
 
     /** Allows disabling the testJActorBlocking method easily. */
-    private static final boolean testJActorBlocking = RUN;
+    public static final boolean testJActorBlocking = RUN;
 
     /** Allows disabling the testKilimDirectTask method easily. */
-    private static final boolean testKilimDirectTask = RUN;
+    public static final boolean testKilimDirectTask = RUN;
 
-    /** Setup all "services" for all test methods. */
+    /** Allows disabling the testJActor2NonBlocking method easily. */
+    public static final boolean testJActor2NonBlocking = RUN;
+
+    /** Allows disabling the testJActor2Isolation method easily. */
+    public static final boolean testJActor2Isolation = RUN;
+
+    /** Setup all "services" for all test methods.
+     * @throws Exception */
     @Override
     @Before
-    public void setup() {
+    public void setup() throws Exception {
         super.setup();
         MESSAGES = DEFAULT_MESSAGES;
     }
@@ -200,6 +211,40 @@ public class Benchmark10MTest extends Benchmark100MTest {
     public void testKilimDirectTask() throws Exception {
         if (testKilimDirectTask) {
             final int result = KilimTask.test(MESSAGES);
+            if (result != MESSAGES) {
+                throw new IllegalStateException("Expected " + MESSAGES
+                        + " but got " + result);
+            }
+        }
+    }
+
+    /** Test with JActor2/async/non-blocking/non-shared reactor. */
+    @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
+    @Test
+    public void testJActor2NonBlocking() throws Exception {
+        if (testJActor2NonBlocking) {
+            final JActor2NonBlockingPinger pinger = new JActor2NonBlockingPinger(
+                    new NonBlockingReactor(facility));
+            final JActor2NonBlockingPonger ponger = new JActor2NonBlockingPonger(
+                    new NonBlockingReactor(facility));
+            final int result = pinger.hammer(ponger, MESSAGES);
+            if (result != MESSAGES) {
+                throw new IllegalStateException("Expected " + MESSAGES
+                        + " but got " + result);
+            }
+        }
+    }
+
+    /** Test with JActor2/async/Isolation/non-shared reactor. */
+    @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
+    @Test
+    public void testJActor2Isolation() throws Exception {
+        if (testJActor2Isolation) {
+            final JActor2NonBlockingPinger pinger = new JActor2NonBlockingPinger(
+                    new IsolationReactor(facility));
+            final JActor2NonBlockingPonger ponger = new JActor2NonBlockingPonger(
+                    new IsolationReactor(facility));
+            final int result = pinger.hammer(ponger, MESSAGES);
             if (result != MESSAGES) {
                 throw new IllegalStateException("Expected " + MESSAGES
                         + " but got " + result);

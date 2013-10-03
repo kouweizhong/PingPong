@@ -16,8 +16,12 @@
 package com.blockwithme.pingpong;
 
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
+import org.agilewiki.jactor.JAMailboxFactory;
 import org.agilewiki.jactor.MailboxFactory;
+import org.agilewiki.jactor2.core.facilities.Facility;
+import org.agilewiki.jactor2.core.reactors.NonBlockingReactor;
 import org.jetlang.fibers.PoolFiberFactory;
 import org.junit.After;
 import org.junit.Before;
@@ -27,6 +31,10 @@ import akka.actor.ActorSystem;
 
 import com.blockwithme.pingpong.latency.impl.DirectPinger;
 import com.blockwithme.pingpong.latency.impl.DirectPonger;
+import com.blockwithme.pingpong.latency.impl.JActor2LocalPinger;
+import com.blockwithme.pingpong.latency.impl.JActor2LocalPonger;
+import com.blockwithme.pingpong.latency.impl.JActor2NonBlockingPinger;
+import com.blockwithme.pingpong.latency.impl.JActor2NonBlockingPonger;
 import com.blockwithme.pingpong.latency.impl.JActorIteratorPinger;
 import com.blockwithme.pingpong.latency.impl.JActorIteratorPonger;
 import com.blockwithme.pingpong.latency.impl.JActorStackOverflowPinger;
@@ -37,6 +45,10 @@ import com.carrotsearch.junitbenchmarks.AbstractBenchmark;
 import com.carrotsearch.junitbenchmarks.BenchmarkOptions;
 import com.carrotsearch.junitbenchmarks.annotation.AxisRange;
 import com.carrotsearch.junitbenchmarks.annotation.BenchmarkMethodChart;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
+import com.typesafe.config.ConfigValue;
+import com.typesafe.config.ConfigValueFactory;
 
 /**
  * Tests the number of seconds required to do sequential request/reply cycles,
@@ -52,7 +64,7 @@ import com.carrotsearch.junitbenchmarks.annotation.BenchmarkMethodChart;
 public class Benchmark100MTest extends AbstractBenchmark {
 
     /** Allows disabling the tests easily. */
-    private static final boolean RUN = false;
+    private static final boolean RUN = true;
 
     /** Allows disabling the testDirect method easily. */
     private static final boolean testDirect = RUN;
@@ -67,10 +79,28 @@ public class Benchmark100MTest extends AbstractBenchmark {
     private static final boolean testJetLang = RUN;
 
     /** Allows disabling the testJActor2NonBlockingSharedMailbox method easily. */
-    private static final boolean testJActor2NonBlockingSharedMailbox = true;
+    private static final boolean testJActor2NonBlockingSharedMailbox = RUN;
+
+    /** Allows disabling the testJActor2Local method easily. */
+    private static final boolean testJActor2Local = RUN;
+
+    /** Allows disabling the testJActor2SharedNonBlocking method easily. */
+    private static final boolean testJActor2SharedNonBlocking = RUN;
+
+    /** Number of threads per pool */
+    protected static final int THREAD_POOL_SIZE = 8;
+
+    /** 1 million */
+    private static final int ONE_MILLION = 1000000;
+
+    /** 10 millions */
+    private static final int TEN_MILLION = 10000000;
+
+    /** 100 millions */
+    private static final int HUNDRED_MILLION = 100000000;
 
     /** Default number of messages */
-    protected static final int DEFAULT_MESSAGES = 10000000;//100000000;
+    protected static final int DEFAULT_MESSAGES = TEN_MILLION;
 
     /**
      * How many messages to send per test?
@@ -92,6 +122,9 @@ public class Benchmark100MTest extends AbstractBenchmark {
     /** The Akka ActorSystem */
     protected ActorSystem system;
 
+    /** The JActors Facility */
+    protected Facility facility;
+
     /** Sets the benchmark properties, for stats and graphics generation. */
     static {
         System.setProperty("jub.consumers", "CONSOLE,H2");
@@ -99,29 +132,71 @@ public class Benchmark100MTest extends AbstractBenchmark {
         System.setProperty("jub.charts.dir", "charts");
     }
 
-    /** Setup all "services" for all test methods. */
+    /** Setup all "services" for all test methods.
+     * @throws Exception */
     @Before
-    public void setup() {
-//        executorService = Executors.newFixedThreadPool(8);
-//        system = ActorSystem.create("AkkaTest");
-//        jaMailboxFactory = JAMailboxFactory.newMailboxFactory(8);
-//        fiberPool = new PoolFiberFactory(executorService);
+    public void setup() throws Exception {
+        if (testDirect || testJetLang || Benchmark10MTest.testExecutorService) {
+            executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
+        }
+        if (Benchmark10MTest.testAkkaBlocking
+                || Benchmark10MTest.testAkkaNonBlocking) {
+            final ConfigValue num = ConfigValueFactory
+                    .fromAnyRef(THREAD_POOL_SIZE);
+            final Config config = ConfigFactory
+                    .load()
+                    .withValue(
+                            "akka.actor.default-dispatcher.fork-join-executor.parallelism-max",
+                            num)
+                    .withValue(
+                            "akka.actor.default-dispatcher.thread-pool-executor.core-pool-size-max",
+                            num)
+                    .withValue(
+                            "akka.actor.default-dispatcher.thread-pool-executor.max-pool-size-max",
+                            num);
+            system = ActorSystem.create("AkkaTest", config);
+        }
+        if (testJActorIterator || testJActorStackOverflow
+                || Benchmark10MTest.testJActorBlocking) {
+            jaMailboxFactory = JAMailboxFactory
+                    .newMailboxFactory(THREAD_POOL_SIZE);
+        }
+        if (testJetLang) {
+            fiberPool = new PoolFiberFactory(executorService);
+        }
+        if (testJActor2Local || testJActor2SharedNonBlocking
+                || Benchmark10MTest.testJActor2NonBlocking
+                || Benchmark10MTest.testJActor2Isolation) {
+            facility = new Facility(THREAD_POOL_SIZE);
+        }
     }
 
     /** Shuts down all "services" for all test methods.
      * @throws Exception */
     @After
     public void teardown() throws Exception {
-//        system.shutdown();
-        system = null;
-//        jaMailboxFactory.close();
-        jaMailboxFactory = null;
-//        fiberPool.dispose();
-        fiberPool = null;
-//        if (!executorService.isShutdown()) {
-//            executorService.shutdownNow();
-//        }
-        executorService = null;
+        if (system != null) {
+            system.shutdown();
+            system = null;
+        }
+        if (jaMailboxFactory != null) {
+            jaMailboxFactory.close();
+            jaMailboxFactory = null;
+        }
+        if (fiberPool != null) {
+            fiberPool.dispose();
+            fiberPool = null;
+        }
+        if (executorService != null) {
+            if (!executorService.isShutdown()) {
+                executorService.shutdownNow();
+            }
+            executorService = null;
+        }
+        if (facility != null) {
+            facility.close();
+            facility = null;
+        }
     }
 
     /** Baseline test: How fast would it go in a single thread? */
@@ -182,6 +257,40 @@ public class Benchmark100MTest extends AbstractBenchmark {
             final JetlangPonger ponger = new JetlangPonger(fiberPool.create());
             final Integer result = pinger.hammer(ponger, MESSAGES);
             if (result.intValue() != MESSAGES) {
+                throw new IllegalStateException("Expected " + MESSAGES
+                        + " but got " + result);
+            }
+        }
+    }
+
+    /** Test with JActor2/Local. */
+    @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
+    @Test
+    public void testJActor2Local() throws Exception {
+        if (testJActor2Local) {
+            final JActor2LocalPinger pinger = new JActor2LocalPinger(
+                    new NonBlockingReactor(facility));
+            final JActor2LocalPonger ponger = new JActor2LocalPonger(
+                    pinger.getReactor());
+            final int result = pinger.hammer(ponger, MESSAGES);
+            if (result != MESSAGES) {
+                throw new IllegalStateException("Expected " + MESSAGES
+                        + " but got " + result);
+            }
+        }
+    }
+
+    /** Test with JActor2/async/non-blocking/shared reactor. */
+    @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
+    @Test
+    public void testJActor2SharedNonBlocking() throws Exception {
+        if (testJActor2SharedNonBlocking) {
+            final JActor2NonBlockingPinger pinger = new JActor2NonBlockingPinger(
+                    new NonBlockingReactor(facility));
+            final JActor2NonBlockingPonger ponger = new JActor2NonBlockingPonger(
+                    pinger.getReactor());
+            final int result = pinger.hammer(ponger, MESSAGES);
+            if (result != MESSAGES) {
                 throw new IllegalStateException("Expected " + MESSAGES
                         + " but got " + result);
             }
