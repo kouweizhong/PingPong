@@ -100,7 +100,7 @@ public class Benchmark100MTest extends AbstractBenchmark {
     private static final int HUNDRED_MILLION = 100000000;
 
     /** Default number of messages */
-    protected static final int DEFAULT_MESSAGES = TEN_MILLION;
+    protected static final int DEFAULT_MESSAGES = HUNDRED_MILLION;
 
     /**
      * How many messages to send per test?
@@ -122,7 +122,7 @@ public class Benchmark100MTest extends AbstractBenchmark {
     /** The Akka ActorSystem */
     protected ActorSystem system;
 
-    /** The JActors Facility */
+    /** The JActor2 Facility */
     protected Facility facility;
 
     /** Sets the benchmark properties, for stats and graphics generation. */

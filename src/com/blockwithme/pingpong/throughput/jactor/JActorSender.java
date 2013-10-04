@@ -1,6 +1,5 @@
 package com.blockwithme.pingpong.throughput.jactor;
 
-import org.agilewiki.jactor.Actor;
 import org.agilewiki.jactor.JAIterator;
 import org.agilewiki.jactor.RP;
 import org.agilewiki.jactor.lpc.JLPCActor;
@@ -11,11 +10,12 @@ import org.agilewiki.jactor.lpc.JLPCActor;
 public class JActorSender extends JLPCActor implements
         JActorRealRequestReceiver {
 
-    private final Actor echo;
+    private final JActorEcho echo;
     private final int count;
     private final int burst;
 
-    public JActorSender(final Actor echo, final int _count, final int _burst) {
+    public JActorSender(final JActorEcho echo, final int _count,
+            final int _burst) {
         this.echo = echo;
         echo.setInitialBufferCapacity(_burst + 10);
         count = _count;
@@ -50,8 +50,7 @@ public class JActorSender extends JLPCActor implements
                     };
                     int j = 0;
                     while (j < burst) {
-                        JActorSimpleRequest.req.send(JActorSender.this, echo,
-                                rd3);
+                        echo.sendSimpleRequest(JActorSender.this, rd3);
                         j += 1;
                     }
                 }

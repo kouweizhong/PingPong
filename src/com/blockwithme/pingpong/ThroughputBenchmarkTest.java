@@ -20,6 +20,10 @@ import org.agilewiki.jactor.JAFuture;
 import org.agilewiki.jactor.JAMailboxFactory;
 import org.agilewiki.jactor.Mailbox;
 import org.agilewiki.jactor.MailboxFactory;
+import org.agilewiki.jactor2.core.facilities.DefaultThreadFactory;
+import org.agilewiki.jactor2.core.facilities.Facility;
+import org.agilewiki.jactor2.core.reactors.NonBlockingReactor;
+import org.agilewiki.jactor2.core.reactors.Reactor;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,18 +32,20 @@ import com.blockwithme.pingpong.throughput.jactor.JActorEcho;
 import com.blockwithme.pingpong.throughput.jactor.JActorParallel;
 import com.blockwithme.pingpong.throughput.jactor.JActorRealRequest;
 import com.blockwithme.pingpong.throughput.jactor.JActorSender;
+import com.blockwithme.pingpong.throughput.jactor2.JActor2Echo;
+import com.blockwithme.pingpong.throughput.jactor2.JActor2Parallel;
+import com.blockwithme.pingpong.throughput.jactor2.JActor2Sender;
 import com.carrotsearch.junitbenchmarks.AbstractBenchmark;
 import com.carrotsearch.junitbenchmarks.BenchmarkOptions;
 import com.carrotsearch.junitbenchmarks.annotation.AxisRange;
 import com.carrotsearch.junitbenchmarks.annotation.BenchmarkMethodChart;
 
 /**
- * Tests the number of seconds required to do sequential request/reply cycles,
+ * Tests the number of seconds required to do parallel request/reply cycles,
  * for different possible Actor implementations.
  *
- * It is in essence a latency test, not a throughput test.
- *
- * It only tests the fastest implementations.
+ * PAIRS is the number of actor pairs, exchanging requests and replies
+ * MESSAGES is the number of messages, each pair exchanges
  */
 @AxisRange(min = 0, max = 3)
 @BenchmarkMethodChart(filePrefix = "ThroughputBenchmark")
@@ -53,7 +59,7 @@ public class ThroughputBenchmarkTest extends AbstractBenchmark {
     }
 
     /** Allows disabling the tests easily. */
-    private static final boolean RUN = false;
+    private static final boolean RUN = true;
 
     /** Allows disabling the testJActorAsyncMailbox method easily. */
     private static final boolean testJActorAsyncMailbox = RUN;
@@ -61,24 +67,20 @@ public class ThroughputBenchmarkTest extends AbstractBenchmark {
     /** Allows disabling the testJActorSharedMailbox method easily. */
     private static final boolean testJActorSharedMailbox = RUN;
 
-    /**
-     * How many messages to send per actor pair?
-     *
-     * It must be big enough, that the direct impl takes a measurable amount
-     * of time. This means that the slower Actor impl will take each several minutes to test.
-     */
-    protected static final int MESSAGES = 1000;
+    /** Allows disabling the testJActor2AsyncMailbox method easily. */
+    private static final boolean testJActor2AsyncMailbox = RUN;
 
-    /**
-     * How many actors pair per test?
-     *
-     * It must be big enough, that the direct impl takes a measurable amount
-     * of time. This means that the slower Actor impl will take each several minutes to test.
-     */
+    /** Allows disabling the testJActor2SharedMailbox method easily. */
+    private static final boolean testJActor2SharedMailbox = RUN;
+
+    /** How many actors pair per test? */
     protected static final int PAIRS = 1000;
 
-    /** How big should the message buffers be? */
-    protected static final int BUFFERS = 1000;
+    /** How many batches to send per actor pair? */
+    protected static final int BATCHES = 1000;
+
+    /** How many messages to send per batch? */
+    protected static final int MESSAGES_PER_BATCH = 1000;
 
     /** How many threads? */
     protected static final int THREADS = 8;
@@ -86,10 +88,16 @@ public class ThroughputBenchmarkTest extends AbstractBenchmark {
     /** The JActor MailboxFactory */
     protected MailboxFactory jaMailboxFactory;
 
-    /** Setup all "services" for all test methods. */
+    /** The JActor2 Facility */
+    protected Facility facility;
+
+    /** Setup all "services" for all test methods.
+     * @throws Exception */
     @Before
-    public void setup() {
+    public void setup() throws Exception {
         jaMailboxFactory = JAMailboxFactory.newMailboxFactory(THREADS);
+        facility = new Facility(MESSAGES_PER_BATCH + 10,
+                MESSAGES_PER_BATCH + 10, THREADS, new DefaultThreadFactory());
     }
 
     /** Shuts down all "services" for all test methods.
@@ -98,6 +106,64 @@ public class ThroughputBenchmarkTest extends AbstractBenchmark {
     public void teardown() throws Exception {
         jaMailboxFactory.close();
         jaMailboxFactory = null;
+        facility.close();
+        facility = null;
+    }
+
+    /** Throughput test in JActors. */
+    private void doJActor(final boolean shared) throws Exception {
+        final Actor[] senders = new Actor[PAIRS];
+        int i = 0;
+        while (i < PAIRS) {
+            final Mailbox echoMailbox = jaMailboxFactory.createAsyncMailbox();
+            final JActorEcho echo = new JActorEcho();
+            echo.initialize(echoMailbox);
+            echo.setInitialBufferCapacity(MESSAGES_PER_BATCH + 10);
+            final Mailbox senderMailbox;
+            if (shared) {
+                senderMailbox = echoMailbox;
+            } else {
+                senderMailbox = jaMailboxFactory.createAsyncMailbox();
+            }
+            final JActorSender s = new JActorSender(echo, BATCHES,
+                    MESSAGES_PER_BATCH);
+            s.initialize(senderMailbox);
+            senders[i] = s;
+            senders[i].setInitialBufferCapacity(MESSAGES_PER_BATCH + 10);
+            i += 1;
+        }
+        final JActorParallel parallel = new JActorParallel();
+        if (shared) {
+            parallel.initialize(jaMailboxFactory.createMailbox());
+        } else {
+            parallel.initialize(jaMailboxFactory.createAsyncMailbox());
+        }
+        parallel.actors = senders;
+        final JAFuture future = new JAFuture();
+        JActorRealRequest.req.send(future, parallel);
+    }
+
+    /** Throughput test in JActor2. */
+    private void doJActor2(final boolean shared) throws Exception {
+        final JActor2Sender[] senders = new JActor2Sender[PAIRS];
+        int i = 0;
+        while (i < PAIRS) {
+            final Reactor echoReactor = new NonBlockingReactor(facility);
+            final JActor2Echo echo = new JActor2Echo(echoReactor);
+            final Reactor senderReactor;
+            if (shared) {
+                senderReactor = echoReactor;
+            } else {
+                senderReactor = new NonBlockingReactor(facility);
+            }
+            final JActor2Sender s = new JActor2Sender(senderReactor, echo,
+                    BATCHES, MESSAGES_PER_BATCH);
+            senders[i] = s;
+            i += 1;
+        }
+        final JActor2Parallel parallel = new JActor2Parallel(
+                new NonBlockingReactor(facility), senders);
+        parallel.startParReq().call();
     }
 
     /** Throughput test in JActors, using async Mailboxes. */
@@ -105,27 +171,7 @@ public class ThroughputBenchmarkTest extends AbstractBenchmark {
     @Test
     public void testJActorAsyncMailbox() throws Exception {
         if (testJActorAsyncMailbox) {
-            final Actor[] senders = new Actor[PAIRS];
-            int i = 0;
-            while (i < PAIRS) {
-                final Mailbox echoMailbox = jaMailboxFactory
-                        .createAsyncMailbox();
-                final JActorEcho echo = new JActorEcho();
-                echo.initialize(echoMailbox);
-                echo.setInitialBufferCapacity(BUFFERS + 10);
-                final Mailbox senderMailbox = jaMailboxFactory
-                        .createAsyncMailbox();
-                final JActorSender s = new JActorSender(echo, MESSAGES, BUFFERS);
-                s.initialize(senderMailbox);
-                senders[i] = s;
-                senders[i].setInitialBufferCapacity(BUFFERS + 10);
-                i += 1;
-            }
-            final JActorParallel parallel = new JActorParallel();
-            parallel.initialize(jaMailboxFactory.createAsyncMailbox());
-            parallel.actors = senders;
-            final JAFuture future = new JAFuture();
-            JActorRealRequest.req.send(future, parallel);
+            doJActor(false);
         }
     }
 
@@ -134,25 +180,25 @@ public class ThroughputBenchmarkTest extends AbstractBenchmark {
     @Test
     public void testJActorSharedMailbox() throws Exception {
         if (testJActorSharedMailbox) {
-            final Actor[] senders = new Actor[PAIRS];
-            int i = 0;
-            while (i < PAIRS) {
-                final Mailbox echoMailbox = jaMailboxFactory
-                        .createAsyncMailbox();
-                final JActorEcho echo = new JActorEcho();
-                echo.initialize(echoMailbox);
-                echo.setInitialBufferCapacity(BUFFERS + 10);
-                final JActorSender s = new JActorSender(echo, MESSAGES, BUFFERS);
-                s.initialize(echoMailbox);
-                senders[i] = s;
-                senders[i].setInitialBufferCapacity(BUFFERS + 10);
-                i += 1;
-            }
-            final JActorParallel parallel = new JActorParallel();
-            parallel.initialize(jaMailboxFactory.createMailbox());
-            parallel.actors = senders;
-            final JAFuture future = new JAFuture();
-            JActorRealRequest.req.send(future, parallel);
+            doJActor(true);
+        }
+    }
+
+    /** Throughput test in JActor2, using async Mailboxes. */
+    @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
+    @Test
+    public void testJActor2AsyncMailbox() throws Exception {
+        if (testJActor2AsyncMailbox) {
+            doJActor2(false);
+        }
+    }
+
+    /** Throughput test in JActor2, using shared Mailboxes. */
+    @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
+    @Test
+    public void testJActor2SharedMailbox() throws Exception {
+        if (testJActor2SharedMailbox) {
+            doJActor2(true);
         }
     }
 }

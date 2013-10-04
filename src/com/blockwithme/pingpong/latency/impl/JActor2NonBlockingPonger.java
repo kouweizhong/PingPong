@@ -44,11 +44,6 @@ public class JActor2NonBlockingPonger extends BladeBase {
         };
     }
 
-    /** Sends a ping(int) request to the Ponger. Blocks and returns response. */
-    public Integer pingCall(final int input) throws Exception {
-        return local(pingReq(input));
-    }
-
     /** Returns the number of Pings received. */
     public int getPings() {
         return pings;
