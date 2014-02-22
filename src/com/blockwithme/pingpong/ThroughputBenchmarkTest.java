@@ -21,6 +21,7 @@ import org.agilewiki.jactor.JAMailboxFactory;
 import org.agilewiki.jactor.Mailbox;
 import org.agilewiki.jactor.MailboxFactory;
 import org.agilewiki.jactor2.core.plant.Plant;
+import org.agilewiki.jactor2.core.plant.PlantConfiguration;
 import org.agilewiki.jactor2.core.reactors.NonBlockingReactor;
 import org.agilewiki.jactor2.core.reactors.Reactor;
 import org.junit.After;
@@ -92,9 +93,17 @@ public class ThroughputBenchmarkTest extends AbstractBenchmark {
     @Before
     public void setup() throws Exception {
         jaMailboxFactory = JAMailboxFactory.newMailboxFactory(THREADS);
-//        facility = new Facility(MESSAGES_PER_BATCH + 10,
-//                MESSAGES_PER_BATCH + 10, THREADS,
-//                new DefaultReactorPoolThreadFactory());
+        new Plant(new PlantConfiguration(THREADS) {
+            @Override
+            public int getInitialLocalMessageQueueSize() {
+                return MESSAGES_PER_BATCH + 10;
+            }
+
+            @Override
+            public int getInitialBufferSize() {
+                return MESSAGES_PER_BATCH + 10;
+            }
+        });
     }
 
     /** Shuts down all "services" for all test methods.
