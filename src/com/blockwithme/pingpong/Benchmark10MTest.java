@@ -224,9 +224,9 @@ public class Benchmark10MTest extends Benchmark100MTest {
     public void testJActor2NonBlocking() throws Exception {
         if (testJActor2NonBlocking) {
             final JActor2NonBlockingPinger pinger = new JActor2NonBlockingPinger(
-                    new NonBlockingReactor(facility));
+                    new NonBlockingReactor());
             final JActor2NonBlockingPonger ponger = new JActor2NonBlockingPonger(
-                    new NonBlockingReactor(facility));
+                    new NonBlockingReactor());
             final int result = pinger.hammer(ponger, MESSAGES);
             if (result != MESSAGES) {
                 throw new IllegalStateException("Expected " + MESSAGES
@@ -241,9 +241,9 @@ public class Benchmark10MTest extends Benchmark100MTest {
     public void testJActor2Isolation() throws Exception {
         if (testJActor2Isolation) {
             final JActor2NonBlockingPinger pinger = new JActor2NonBlockingPinger(
-                    new IsolationReactor(facility));
+                    new IsolationReactor());
             final JActor2NonBlockingPonger ponger = new JActor2NonBlockingPonger(
-                    new IsolationReactor(facility));
+                    new IsolationReactor());
             final int result = pinger.hammer(ponger, MESSAGES);
             if (result != MESSAGES) {
                 throw new IllegalStateException("Expected " + MESSAGES

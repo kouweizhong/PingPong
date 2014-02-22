@@ -16,8 +16,8 @@
 package com.blockwithme.pingpong.latency.impl;
 
 import org.agilewiki.jactor2.core.blades.BladeBase;
-import org.agilewiki.jactor2.core.messages.SyncRequest;
 import org.agilewiki.jactor2.core.reactors.Reactor;
+import org.agilewiki.jactor2.core.requests.SyncRequest;
 
 /**
  * Receives Pings, and send Pongs back.
@@ -29,7 +29,7 @@ public class JActor2NonBlockingPonger extends BladeBase {
 
     /** Constructs a JActor2Ponger. */
     public JActor2NonBlockingPonger(final Reactor _reactor) throws Exception {
-        initialize(_reactor);
+        _initialize(_reactor);
     }
 
     /** Creates a ping(int) request to the Ponger. */
@@ -37,7 +37,7 @@ public class JActor2NonBlockingPonger extends BladeBase {
         /** A Ping request, targeted at Ponger. */
         return new SyncBladeRequest<Integer>() {
             @Override
-            protected Integer processSyncRequest() throws Exception {
+            public Integer processSyncRequest() throws Exception {
                 pings++;
                 return input + 1;
             }

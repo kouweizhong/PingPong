@@ -34,7 +34,7 @@ We are currently testing the following JVM-based actor implementations:
 
 In some cases, multiple variants are tested.
 
-We have a have-finished Kilim implementation. Lack of Maven support and the bytecode weaving requirement makes things a lot more difficult then for the other APIs.
+We have a half-finished Kilim implementation. Lack of Maven support and the bytecode weaving requirement makes things a lot more difficult then for the other APIs.
 
 And maybe we will add Groovy actors too. But we don't plan to add anything that had no update in the last year or so.
 
@@ -61,5 +61,5 @@ Current results, on my aging Intel Xeon X3360 @2.83 GHz, with 800 MHz RAM, Win7 
 
 http://skunkiferous.github.com/PingPong/
 
-Be warned that I have teamed up with the author of JActor to create a full POJO reimplementation (PActor), and so of course those are the APIs for which we can create the most adequate test code. Still, you can see the code to make sure that we did approximatly the same thing for all APIs. Feel free to offer improvements to the other API test code, as we are trying to be fair.
+Disclamer: I am working with the author of JActors and JActor2, so those are the APIs for which we can create the most adequate test code. Still, you can see the code to make sure that we did approximatly the same thing for all APIs. Feel free to offer improvements to the other API test code, as we are trying to be fair.
 

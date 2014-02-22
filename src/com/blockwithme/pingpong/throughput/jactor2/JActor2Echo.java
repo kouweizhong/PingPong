@@ -16,8 +16,8 @@
 package com.blockwithme.pingpong.throughput.jactor2;
 
 import org.agilewiki.jactor2.core.blades.BladeBase;
-import org.agilewiki.jactor2.core.messages.SyncRequest;
 import org.agilewiki.jactor2.core.reactors.Reactor;
+import org.agilewiki.jactor2.core.requests.SyncRequest;
 
 /**
  * @author monster
@@ -27,7 +27,7 @@ public class JActor2Echo extends BladeBase {
 
     /** Constructs a JActor2Echo. */
     public JActor2Echo(final Reactor _reactor) throws Exception {
-        initialize(_reactor);
+        _initialize(_reactor);
     }
 
     /** Creates an echo (null) request. */
@@ -35,7 +35,7 @@ public class JActor2Echo extends BladeBase {
         /** An echo (null) request. */
         return new SyncBladeRequest<Void>() {
             @Override
-            protected Void processSyncRequest() throws Exception {
+            public Void processSyncRequest() throws Exception {
                 return null;
             }
         };

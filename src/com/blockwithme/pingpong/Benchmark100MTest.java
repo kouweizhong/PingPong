@@ -20,7 +20,7 @@ import java.util.concurrent.Executors;
 
 import org.agilewiki.jactor.JAMailboxFactory;
 import org.agilewiki.jactor.MailboxFactory;
-import org.agilewiki.jactor2.core.facilities.Facility;
+import org.agilewiki.jactor2.core.plant.Plant;
 import org.agilewiki.jactor2.core.reactors.NonBlockingReactor;
 import org.jetlang.fibers.PoolFiberFactory;
 import org.junit.After;
@@ -31,8 +31,6 @@ import akka.actor.ActorSystem;
 
 import com.blockwithme.pingpong.latency.impl.DirectPinger;
 import com.blockwithme.pingpong.latency.impl.DirectPonger;
-import com.blockwithme.pingpong.latency.impl.JActor2LocalPinger;
-import com.blockwithme.pingpong.latency.impl.JActor2LocalPonger;
 import com.blockwithme.pingpong.latency.impl.JActor2NonBlockingPinger;
 import com.blockwithme.pingpong.latency.impl.JActor2NonBlockingPonger;
 import com.blockwithme.pingpong.latency.impl.JActorIteratorPinger;
@@ -122,9 +120,6 @@ public class Benchmark100MTest extends AbstractBenchmark {
     /** The Akka ActorSystem */
     protected ActorSystem system;
 
-    /** The JActor2 Facility */
-    protected Facility facility;
-
     /** Sets the benchmark properties, for stats and graphics generation. */
     static {
         System.setProperty("jub.consumers", "CONSOLE,H2");
@@ -167,7 +162,7 @@ public class Benchmark100MTest extends AbstractBenchmark {
         if (testJActor2Local || testJActor2SharedNonBlocking
                 || Benchmark10MTest.testJActor2NonBlocking
                 || Benchmark10MTest.testJActor2Isolation) {
-            facility = new Facility(THREAD_POOL_SIZE);
+            new Plant(THREAD_POOL_SIZE);
         }
     }
 
@@ -193,10 +188,7 @@ public class Benchmark100MTest extends AbstractBenchmark {
             }
             executorService = null;
         }
-        if (facility != null) {
-            facility.close();
-            facility = null;
-        }
+        Plant.close();
     }
 
     /** Baseline test: How fast would it go in a single thread? */
@@ -263,30 +255,13 @@ public class Benchmark100MTest extends AbstractBenchmark {
         }
     }
 
-    /** Test with JActor2/Local. */
-    @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
-    @Test
-    public void testJActor2Local() throws Exception {
-        if (testJActor2Local) {
-            final JActor2LocalPinger pinger = new JActor2LocalPinger(
-                    new NonBlockingReactor(facility));
-            final JActor2LocalPonger ponger = new JActor2LocalPonger(
-                    pinger.getReactor());
-            final int result = pinger.hammer(ponger, MESSAGES);
-            if (result != MESSAGES) {
-                throw new IllegalStateException("Expected " + MESSAGES
-                        + " but got " + result);
-            }
-        }
-    }
-
     /** Test with JActor2/async/non-blocking/shared reactor. */
     @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
     public void testJActor2SharedNonBlocking() throws Exception {
         if (testJActor2SharedNonBlocking) {
             final JActor2NonBlockingPinger pinger = new JActor2NonBlockingPinger(
-                    new NonBlockingReactor(facility));
+                    new NonBlockingReactor());
             final JActor2NonBlockingPonger ponger = new JActor2NonBlockingPonger(
                     pinger.getReactor());
             final int result = pinger.hammer(ponger, MESSAGES);

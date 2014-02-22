@@ -16,9 +16,9 @@
 package com.blockwithme.pingpong.throughput.jactor2;
 
 import org.agilewiki.jactor2.core.blades.BladeBase;
-import org.agilewiki.jactor2.core.messages.AsyncRequest;
-import org.agilewiki.jactor2.core.messages.AsyncResponseProcessor;
 import org.agilewiki.jactor2.core.reactors.Reactor;
+import org.agilewiki.jactor2.core.requests.AsyncRequest;
+import org.agilewiki.jactor2.core.requests.AsyncResponseProcessor;
 
 /**
  * @author monster
@@ -31,7 +31,7 @@ public class JActor2Parallel extends BladeBase {
     /** Constructs a JActor2Echo. */
     public JActor2Parallel(final Reactor _reactor,
             final JActor2Sender[] _senders) throws Exception {
-        initialize(_reactor);
+        _initialize(_reactor);
         senders = _senders;
     }
 
@@ -53,7 +53,7 @@ public class JActor2Parallel extends BladeBase {
             private int replies = 0;
 
             @Override
-            protected void processAsyncRequest() throws Exception {
+            public void processAsyncRequest() throws Exception {
                 for (int i = 0; i < senders.length; i++) {
                     send(senders[i].startEchoReq(), echoResponseProcessor);
                 }

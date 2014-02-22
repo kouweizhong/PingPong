@@ -20,8 +20,7 @@ import org.agilewiki.jactor.JAFuture;
 import org.agilewiki.jactor.JAMailboxFactory;
 import org.agilewiki.jactor.Mailbox;
 import org.agilewiki.jactor.MailboxFactory;
-import org.agilewiki.jactor2.core.facilities.DefaultThreadFactory;
-import org.agilewiki.jactor2.core.facilities.Facility;
+import org.agilewiki.jactor2.core.plant.Plant;
 import org.agilewiki.jactor2.core.reactors.NonBlockingReactor;
 import org.agilewiki.jactor2.core.reactors.Reactor;
 import org.junit.After;
@@ -88,16 +87,14 @@ public class ThroughputBenchmarkTest extends AbstractBenchmark {
     /** The JActor MailboxFactory */
     protected MailboxFactory jaMailboxFactory;
 
-    /** The JActor2 Facility */
-    protected Facility facility;
-
     /** Setup all "services" for all test methods.
      * @throws Exception */
     @Before
     public void setup() throws Exception {
         jaMailboxFactory = JAMailboxFactory.newMailboxFactory(THREADS);
-        facility = new Facility(MESSAGES_PER_BATCH + 10,
-                MESSAGES_PER_BATCH + 10, THREADS, new DefaultThreadFactory());
+//        facility = new Facility(MESSAGES_PER_BATCH + 10,
+//                MESSAGES_PER_BATCH + 10, THREADS,
+//                new DefaultReactorPoolThreadFactory());
     }
 
     /** Shuts down all "services" for all test methods.
@@ -106,8 +103,7 @@ public class ThroughputBenchmarkTest extends AbstractBenchmark {
     public void teardown() throws Exception {
         jaMailboxFactory.close();
         jaMailboxFactory = null;
-        facility.close();
-        facility = null;
+        Plant.close();
     }
 
     /** Throughput test in JActors. */
@@ -148,13 +144,13 @@ public class ThroughputBenchmarkTest extends AbstractBenchmark {
         final JActor2Sender[] senders = new JActor2Sender[PAIRS];
         int i = 0;
         while (i < PAIRS) {
-            final Reactor echoReactor = new NonBlockingReactor(facility);
+            final Reactor echoReactor = new NonBlockingReactor();
             final JActor2Echo echo = new JActor2Echo(echoReactor);
             final Reactor senderReactor;
             if (shared) {
                 senderReactor = echoReactor;
             } else {
-                senderReactor = new NonBlockingReactor(facility);
+                senderReactor = new NonBlockingReactor();
             }
             final JActor2Sender s = new JActor2Sender(senderReactor, echo,
                     BATCHES, MESSAGES_PER_BATCH);
@@ -162,7 +158,7 @@ public class ThroughputBenchmarkTest extends AbstractBenchmark {
             i += 1;
         }
         final JActor2Parallel parallel = new JActor2Parallel(
-                new NonBlockingReactor(facility), senders);
+                new NonBlockingReactor(), senders);
         parallel.startParReq().call();
     }
 

@@ -16,8 +16,8 @@
 package com.blockwithme.pingpong.latency.impl;
 
 import org.agilewiki.jactor2.core.blades.BladeBase;
-import org.agilewiki.jactor2.core.messages.AsyncResponseProcessor;
 import org.agilewiki.jactor2.core.reactors.Reactor;
+import org.agilewiki.jactor2.core.requests.AsyncResponseProcessor;
 
 /**
  * The Pinger's job is to hammer the Ponger with ping() request.
@@ -27,7 +27,7 @@ public class JActor2NonBlockingPinger extends BladeBase {
 
     /** Constructs a JActor2BlockingPinger. */
     public JActor2NonBlockingPinger(final Reactor _reactor) throws Exception {
-        initialize(_reactor);
+        _initialize(_reactor);
     }
 
     /** Creates a hammer(ponger, int) request to the Pinger. */
@@ -54,7 +54,7 @@ public class JActor2NonBlockingPinger extends BladeBase {
             private int done = 0;
 
             @Override
-            protected void processAsyncRequest() throws Exception {
+            public void processAsyncRequest() throws Exception {
                 send(ponger.pingReq(done++), pingResponseProcessor);
             }
         };
