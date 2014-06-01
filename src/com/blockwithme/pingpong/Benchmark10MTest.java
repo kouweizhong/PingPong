@@ -149,10 +149,10 @@ public class Benchmark10MTest extends Benchmark100MTest {
     @Test
     public void testAkkaBlocking() throws Exception {
         if (testAkkaBlocking) {
-            final ActorRef pinger = system.actorOf(new Props(
-                    AkkaBlockingPinger.class), "blockingPinger");
-            final ActorRef ponger = system.actorOf(new Props(
-                    AkkaBlockingPonger.class), "blockingPonger");
+            final ActorRef pinger = system.actorOf(
+                    Props.create(AkkaBlockingPinger.class), "blockingPinger");
+            final ActorRef ponger = system.actorOf(
+                    Props.create(AkkaBlockingPonger.class), "blockingPonger");
 
             final Timeout timeout = new Timeout(Duration.create(600, "seconds"));
             final Future<Object> future = Patterns.ask(pinger,
@@ -171,10 +171,12 @@ public class Benchmark10MTest extends Benchmark100MTest {
     @Test
     public void testAkkaNonBlocking() throws Exception {
         if (testAkkaNonBlocking) {
-            final ActorRef pinger = system.actorOf(new Props(
-                    AkkaNonBlockingPinger.class), "nonBlockingPinger");
-            final ActorRef ponger = system.actorOf(new Props(
-                    AkkaNonBlockingPonger.class), "nonBlockingPonger");
+            final ActorRef pinger = system.actorOf(
+                    Props.create(AkkaNonBlockingPinger.class),
+                    "nonBlockingPinger");
+            final ActorRef ponger = system.actorOf(
+                    Props.create(AkkaNonBlockingPonger.class),
+                    "nonBlockingPonger");
 
             final Timeout timeout = new Timeout(Duration.create(600, "seconds"));
             final Future<Object> future = Patterns.ask(pinger,

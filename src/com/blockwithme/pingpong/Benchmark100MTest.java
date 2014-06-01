@@ -20,7 +20,7 @@ import java.util.concurrent.Executors;
 
 import org.agilewiki.jactor.JAMailboxFactory;
 import org.agilewiki.jactor.MailboxFactory;
-import org.agilewiki.jactor2.core.plant.Plant;
+import org.agilewiki.jactor2.core.impl.Plant;
 import org.agilewiki.jactor2.core.reactors.NonBlockingReactor;
 import org.jetlang.fibers.PoolFiberFactory;
 import org.junit.After;

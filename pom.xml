@@ -12,7 +12,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.blockwithme</groupId>
 	<artifactId>PingPong</artifactId>
-	<version>0.0.4</version>
+	<version>0.10.0</version>
 	<packaging>jar</packaging>
 	<name>PingPong</name>
 	<description>Shows how to implement a simple request-reply example using multiple Java Actor APIs, as a benchmark.</description>
@@ -177,17 +177,22 @@
 		<dependency>
 			<groupId>org.agilewiki.jactor2</groupId>
 			<artifactId>jactor2-core</artifactId>
-			<version>0.8.0</version>
+			<version>0.10.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.agilewiki.jactor2</groupId>
+			<artifactId>jactor2-coreMt</artifactId>
+			<version>0.10.0</version>
 		</dependency>
 		<dependency>
     		<groupId>com.typesafe.akka</groupId>
-    		<artifactId>akka-actor_2.10</artifactId>
-    		<version>2.2.1</version>
+    		<artifactId>akka-actor_2.11</artifactId>
+    		<version>2.3.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jetlang</groupId>
 			<artifactId>jetlang</artifactId>
-			<version>0.2.10</version>
+			<version>0.2.12</version>
 		</dependency>
 		<!-- Needed by Kilim -->
 		<!-- <dependency>
