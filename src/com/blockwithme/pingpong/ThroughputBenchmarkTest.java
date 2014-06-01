@@ -22,6 +22,8 @@ import org.agilewiki.jactor.Mailbox;
 import org.agilewiki.jactor.MailboxFactory;
 import org.agilewiki.jactor2.core.impl.Plant;
 import org.agilewiki.jactor2.core.impl.mtPlant.PlantConfiguration;
+import org.agilewiki.jactor2.core.reactors.BlockingReactor;
+import org.agilewiki.jactor2.core.reactors.IsolationReactor;
 import org.agilewiki.jactor2.core.reactors.NonBlockingReactor;
 import org.agilewiki.jactor2.core.reactors.Reactor;
 import org.junit.After;
@@ -51,12 +53,40 @@ import com.carrotsearch.junitbenchmarks.annotation.BenchmarkMethodChart;
 @BenchmarkMethodChart(filePrefix = "ThroughputBenchmark")
 public class ThroughputBenchmarkTest extends AbstractBenchmark {
 
+    private static interface ReactorFactoy {
+        Reactor create() throws Exception;
+    }
+
+    private static class NonBlockingReactorFactoy implements ReactorFactoy {
+        @Override
+        public Reactor create() throws Exception {
+            return new NonBlockingReactor();
+        }
+    }
+
+    private static class BlockingReactorFactoy implements ReactorFactoy {
+        @Override
+        public Reactor create() throws Exception {
+            return new BlockingReactor();
+        }
+    }
+
+    private static class IsolationReactorFactoy implements ReactorFactoy {
+        @Override
+        public Reactor create() throws Exception {
+            return new IsolationReactor();
+        }
+    }
+
     /** Sets the benchmark properties, for stats and graphics generation. */
     static {
         System.setProperty("jub.consumers", "CONSOLE,H2");
         System.setProperty("jub.db.file", "benchmarks");
         System.setProperty("jub.charts.dir", "charts");
     }
+
+    /** Allows fast "functional testing" of the tests. */
+    private static final boolean QUICK = false;
 
     /** Allows disabling the tests easily. */
     private static final boolean RUN = true;
@@ -67,20 +97,26 @@ public class ThroughputBenchmarkTest extends AbstractBenchmark {
     /** Allows disabling the testJActorSharedMailbox method easily. */
     private static final boolean testJActorSharedMailbox = RUN;
 
-    /** Allows disabling the testJActor2AsyncMailbox method easily. */
-    private static final boolean testJActor2AsyncMailbox = RUN;
+    /** Allows disabling the testJActor2NBAsyncMailbox method easily. */
+    private static final boolean testJActor2NBAsyncMailbox = RUN;
 
-    /** Allows disabling the testJActor2SharedMailbox method easily. */
-    private static final boolean testJActor2SharedMailbox = RUN;
+    /** Allows disabling the testJActor2NBSharedMailbox method easily. */
+    private static final boolean testJActor2NBSharedMailbox = RUN;
+
+    /** Allows disabling the testJActor2BAsyncMailbox method easily. */
+    private static final boolean testJActor2BAsyncMailbox = RUN;
+
+    /** Allows disabling the testJActor2IAsyncMailbox method easily. */
+    private static final boolean testJActor2IAsyncMailbox = RUN;
 
     /** How many actors pair per test? */
-    protected static final int PAIRS = 1000;
+    protected static final int PAIRS = QUICK ? 10 : 1000;
 
     /** How many batches to send per actor pair? */
-    protected static final int BATCHES = 1000;
+    protected static final int BATCHES = QUICK ? 10 : 1000;
 
     /** How many messages to send per batch? */
-    protected static final int MESSAGES_PER_BATCH = 1000;
+    protected static final int MESSAGES_PER_BATCH = QUICK ? 10 : 1000;
 
     /** How many threads? */
     protected static final int THREADS = 8;
@@ -93,7 +129,7 @@ public class ThroughputBenchmarkTest extends AbstractBenchmark {
     @Before
     public void setup() throws Exception {
         jaMailboxFactory = JAMailboxFactory.newMailboxFactory(THREADS);
-        new Plant(new PlantConfiguration(THREADS) {
+        new IsolationFriendlyPlantMtImpl(new PlantConfiguration(THREADS) {
             @Override
             public int getInitialLocalMessageQueueSize() {
                 return MESSAGES_PER_BATCH + 10;
@@ -149,25 +185,26 @@ public class ThroughputBenchmarkTest extends AbstractBenchmark {
     }
 
     /** Throughput test in JActor2. */
-    private void doJActor2(final boolean shared) throws Exception {
+    private void doJActor2(final boolean shared, final ReactorFactoy factory)
+            throws Exception {
         final JActor2Sender[] senders = new JActor2Sender[PAIRS];
         int i = 0;
         while (i < PAIRS) {
-            final Reactor echoReactor = new NonBlockingReactor();
+            final Reactor echoReactor = factory.create();
             final JActor2Echo echo = new JActor2Echo(echoReactor);
             final Reactor senderReactor;
             if (shared) {
                 senderReactor = echoReactor;
             } else {
-                senderReactor = new NonBlockingReactor();
+                senderReactor = factory.create();
             }
             final JActor2Sender s = new JActor2Sender(senderReactor, echo,
                     BATCHES, MESSAGES_PER_BATCH);
             senders[i] = s;
             i += 1;
         }
-        final JActor2Parallel parallel = new JActor2Parallel(
-                new NonBlockingReactor(), senders);
+        final JActor2Parallel parallel = new JActor2Parallel(factory.create(),
+                senders);
         parallel.startParReq().call();
     }
 
@@ -192,18 +229,36 @@ public class ThroughputBenchmarkTest extends AbstractBenchmark {
     /** Throughput test in JActor2, using async Mailboxes. */
     @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
-    public void testJActor2AsyncMailbox() throws Exception {
-        if (testJActor2AsyncMailbox) {
-            doJActor2(false);
+    public void testJActor2NBAsyncMailbox() throws Exception {
+        if (testJActor2NBAsyncMailbox) {
+            doJActor2(false, new NonBlockingReactorFactoy());
         }
     }
 
     /** Throughput test in JActor2, using shared Mailboxes. */
     @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
     @Test
-    public void testJActor2SharedMailbox() throws Exception {
-        if (testJActor2SharedMailbox) {
-            doJActor2(true);
+    public void testJActor2NBSharedMailbox() throws Exception {
+        if (testJActor2NBSharedMailbox) {
+            doJActor2(true, new NonBlockingReactorFactoy());
+        }
+    }
+
+    /** Throughput test in JActor2, using async Mailboxes. */
+    @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
+    @Test
+    public void testJActor2BAsyncMailbox() throws Exception {
+        if (testJActor2BAsyncMailbox) {
+            doJActor2(false, new BlockingReactorFactoy());
+        }
+    }
+
+    /** Throughput test in JActor2, using async Mailboxes. */
+    @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
+    @Test
+    public void testJActor2IAsyncMailbox() throws Exception {
+        if (testJActor2IAsyncMailbox) {
+            doJActor2(false, new IsolationReactorFactoy());
         }
     }
 }

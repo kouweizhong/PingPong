@@ -31,8 +31,8 @@ import akka.actor.ActorSystem;
 
 import com.blockwithme.pingpong.latency.impl.DirectPinger;
 import com.blockwithme.pingpong.latency.impl.DirectPonger;
-import com.blockwithme.pingpong.latency.impl.JActor2NonBlockingPinger;
-import com.blockwithme.pingpong.latency.impl.JActor2NonBlockingPonger;
+import com.blockwithme.pingpong.latency.impl.JActor2Pinger;
+import com.blockwithme.pingpong.latency.impl.JActor2Ponger;
 import com.blockwithme.pingpong.latency.impl.JActorIteratorPinger;
 import com.blockwithme.pingpong.latency.impl.JActorIteratorPonger;
 import com.blockwithme.pingpong.latency.impl.JActorStackOverflowPinger;
@@ -60,6 +60,9 @@ import com.typesafe.config.ConfigValueFactory;
 @BenchmarkMethodChart(filePrefix = "Benchmark100MTest")
 @SuppressWarnings("all")
 public class Benchmark100MTest extends AbstractBenchmark {
+
+    /** Allows fast "functional testing" of the tests. */
+    private static final boolean QUICK = false;
 
     /** Allows disabling the tests easily. */
     private static final boolean RUN = true;
@@ -98,7 +101,8 @@ public class Benchmark100MTest extends AbstractBenchmark {
     private static final int HUNDRED_MILLION = 100000000;
 
     /** Default number of messages */
-    protected static final int DEFAULT_MESSAGES = HUNDRED_MILLION;
+    protected static final int DEFAULT_MESSAGES = QUICK ? ONE_MILLION
+            : HUNDRED_MILLION;
 
     /**
      * How many messages to send per test?
@@ -162,7 +166,7 @@ public class Benchmark100MTest extends AbstractBenchmark {
         if (testJActor2Local || testJActor2SharedNonBlocking
                 || Benchmark10MTest.testJActor2NonBlocking
                 || Benchmark10MTest.testJActor2Isolation) {
-            new Plant(THREAD_POOL_SIZE);
+            new IsolationFriendlyPlantMtImpl(THREAD_POOL_SIZE);
         }
     }
 
@@ -260,10 +264,9 @@ public class Benchmark100MTest extends AbstractBenchmark {
     @Test
     public void testJActor2SharedNonBlocking() throws Exception {
         if (testJActor2SharedNonBlocking) {
-            final JActor2NonBlockingPinger pinger = new JActor2NonBlockingPinger(
+            final JActor2Pinger pinger = new JActor2Pinger(
                     new NonBlockingReactor());
-            final JActor2NonBlockingPonger ponger = new JActor2NonBlockingPonger(
-                    pinger.getReactor());
+            final JActor2Ponger ponger = new JActor2Ponger(pinger.getReactor());
             final int result = pinger.hammer(ponger, MESSAGES);
             if (result != MESSAGES) {
                 throw new IllegalStateException("Expected " + MESSAGES

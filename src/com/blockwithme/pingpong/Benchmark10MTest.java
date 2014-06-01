@@ -15,6 +15,7 @@
  */
 package com.blockwithme.pingpong;
 
+import org.agilewiki.jactor2.core.reactors.BlockingReactor;
 import org.agilewiki.jactor2.core.reactors.IsolationReactor;
 import org.agilewiki.jactor2.core.reactors.NonBlockingReactor;
 import org.junit.Before;
@@ -34,8 +35,8 @@ import com.blockwithme.pingpong.latency.impl.AkkaNonBlockingPinger;
 import com.blockwithme.pingpong.latency.impl.AkkaNonBlockingPonger;
 import com.blockwithme.pingpong.latency.impl.ExecutorServicePinger;
 import com.blockwithme.pingpong.latency.impl.ExecutorServicePonger;
-import com.blockwithme.pingpong.latency.impl.JActor2NonBlockingPinger;
-import com.blockwithme.pingpong.latency.impl.JActor2NonBlockingPonger;
+import com.blockwithme.pingpong.latency.impl.JActor2Pinger;
+import com.blockwithme.pingpong.latency.impl.JActor2Ponger;
 import com.blockwithme.pingpong.latency.impl.JActorBlockingPinger;
 import com.blockwithme.pingpong.latency.impl.JActorBlockingPonger;
 import com.blockwithme.pingpong.latency.impl.ThreadWithBlockingQueuePinger;
@@ -84,6 +85,9 @@ public class Benchmark10MTest extends Benchmark100MTest {
 
     /** Allows disabling the testJActor2Isolation method easily. */
     public static final boolean testJActor2Isolation = RUN;
+
+    /** Allows disabling the testJActor2Blocking method easily. */
+    public static final boolean testJActor2Blocking = RUN;
 
     /** Setup all "services" for all test methods.
      * @throws Exception */
@@ -225,9 +229,9 @@ public class Benchmark10MTest extends Benchmark100MTest {
     @Test
     public void testJActor2NonBlocking() throws Exception {
         if (testJActor2NonBlocking) {
-            final JActor2NonBlockingPinger pinger = new JActor2NonBlockingPinger(
+            final JActor2Pinger pinger = new JActor2Pinger(
                     new NonBlockingReactor());
-            final JActor2NonBlockingPonger ponger = new JActor2NonBlockingPonger(
+            final JActor2Ponger ponger = new JActor2Ponger(
                     new NonBlockingReactor());
             final int result = pinger.hammer(ponger, MESSAGES);
             if (result != MESSAGES) {
@@ -242,10 +246,27 @@ public class Benchmark10MTest extends Benchmark100MTest {
     @Test
     public void testJActor2Isolation() throws Exception {
         if (testJActor2Isolation) {
-            final JActor2NonBlockingPinger pinger = new JActor2NonBlockingPinger(
+            final JActor2Pinger pinger = new JActor2Pinger(
                     new IsolationReactor());
-            final JActor2NonBlockingPonger ponger = new JActor2NonBlockingPonger(
+            final JActor2Ponger ponger = new JActor2Ponger(
                     new IsolationReactor());
+            final int result = pinger.hammer(ponger, MESSAGES);
+            if (result != MESSAGES) {
+                throw new IllegalStateException("Expected " + MESSAGES
+                        + " but got " + result);
+            }
+        }
+    }
+
+    /** Test with JActor2/async/blocking/non-shared reactor. */
+    @BenchmarkOptions(benchmarkRounds = 3, warmupRounds = 3)
+    @Test
+    public void testJActor2Blocking() throws Exception {
+        if (testJActor2Blocking) {
+            final JActor2Pinger pinger = new JActor2Pinger(
+                    new BlockingReactor());
+            final JActor2Ponger ponger = new JActor2Ponger(
+                    new BlockingReactor());
             final int result = pinger.hammer(ponger, MESSAGES);
             if (result != MESSAGES) {
                 throw new IllegalStateException("Expected " + MESSAGES

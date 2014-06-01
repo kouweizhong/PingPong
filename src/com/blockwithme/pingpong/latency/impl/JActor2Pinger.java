@@ -23,16 +23,16 @@ import org.agilewiki.jactor2.core.requests.AsyncResponseProcessor;
  * The Pinger's job is to hammer the Ponger with ping() request.
  * Implemented using async calls in JActor2.
  */
-public class JActor2NonBlockingPinger extends BladeBase {
+public class JActor2Pinger extends BladeBase {
 
     /** Constructs a JActor2BlockingPinger. */
-    public JActor2NonBlockingPinger(final Reactor _reactor) throws Exception {
+    public JActor2Pinger(final Reactor _reactor) throws Exception {
         _initialize(_reactor);
     }
 
     /** Creates a hammer(ponger, int) request to the Pinger. */
     public AsyncBladeRequest<Integer> hammerReq(
-            final JActor2NonBlockingPonger ponger, final int count) {
+            final JActor2Ponger ponger, final int count) {
         /** A Ping request, targeted at Ponger. */
         return new AsyncBladeRequest<Integer>() {
             private final AsyncResponseProcessor<Integer> dis = this;
@@ -61,7 +61,7 @@ public class JActor2NonBlockingPinger extends BladeBase {
     }
 
     /** Tells the Pinger to hammer the Ponger. Blocks and returns the result. */
-    public int hammer(final JActor2NonBlockingPonger ponger, final int count)
+    public int hammer(final JActor2Ponger ponger, final int count)
             throws Exception {
         return hammerReq(ponger, count).call();
     }

@@ -23,12 +23,12 @@ import org.agilewiki.jactor2.core.requests.SyncRequest;
  * Receives Pings, and send Pongs back.
  * Implemented using async calls in JActor2.
  */
-public class JActor2NonBlockingPonger extends BladeBase {
+public class JActor2Ponger extends BladeBase {
     /** Some mutable data of Ponger. */
     private int pings;
 
     /** Constructs a JActor2Ponger. */
-    public JActor2NonBlockingPonger(final Reactor _reactor) throws Exception {
+    public JActor2Ponger(final Reactor _reactor) throws Exception {
         _initialize(_reactor);
     }
 
