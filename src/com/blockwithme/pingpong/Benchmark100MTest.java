@@ -101,7 +101,7 @@ public class Benchmark100MTest extends AbstractBenchmark {
     private static final int HUNDRED_MILLION = 100000000;
 
     /** Default number of messages */
-    protected static final int DEFAULT_MESSAGES = QUICK ? ONE_MILLION
+    protected static final int DEFAULT_MESSAGES = QUICK ? TEN_MILLION
             : HUNDRED_MILLION;
 
     /**
