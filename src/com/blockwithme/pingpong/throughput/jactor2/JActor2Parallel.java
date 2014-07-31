@@ -17,8 +17,9 @@ package com.blockwithme.pingpong.throughput.jactor2;
 
 import org.agilewiki.jactor2.core.blades.BladeBase;
 import org.agilewiki.jactor2.core.reactors.Reactor;
-import org.agilewiki.jactor2.core.requests.AsyncRequest;
+import org.agilewiki.jactor2.core.requests.AsyncRequestImplWithData;
 import org.agilewiki.jactor2.core.requests.AsyncResponseProcessor;
+import org.agilewiki.jactor2.core.requests.StaticAOp;
 
 /**
  * @author monster
@@ -36,28 +37,33 @@ public class JActor2Parallel extends BladeBase {
     }
 
     /** Creates an start parallel request. */
-    public AsyncRequest<Void> startParReq() {
-        return new AsyncBladeRequest<Void>() {
-            private final AsyncResponseProcessor<Void> dis = this;
-            private final AsyncResponseProcessor<Void> echoResponseProcessor = new AsyncResponseProcessor<Void>() {
+    private static final StaticAOp<JActor2Parallel, Void> START_PAR_REQ = new StaticAOp<JActor2Parallel, Void>(
+            JActor2Parallel.class) {
+        private final IntVar replies = var(0);
+
+        @Override
+        protected void processAsyncOperation(final JActor2Parallel blade,
+                final AsyncRequestImplWithData<Void> _asyncRequestImpl,
+                final AsyncResponseProcessor<Void> _asyncResponseProcessor)
+                throws Exception {
+            final JActor2Sender[] senders = blade.senders;
+            final AsyncResponseProcessor<Void> echoResponseProcessor = new AsyncResponseProcessor<Void>() {
                 @Override
                 public void processAsyncResponse(final Void response)
                         throws Exception {
-                    replies++;
-                    if (replies == senders.length) {
-                        dis.processAsyncResponse(response);
+                    if (replies.inc(_asyncRequestImpl) == senders.length - 1) {
+                        _asyncRequestImpl.processAsyncResponse(response);
                     }
                 }
             };
-            /** Number of replies. */
-            private int replies = 0;
-
-            @Override
-            public void processAsyncRequest() throws Exception {
-                for (int i = 0; i < senders.length; i++) {
-                    send(senders[i].startEchoReq(), echoResponseProcessor);
-                }
+            for (int i = 0; i < senders.length; i++) {
+                _asyncRequestImpl.send(senders[i].startEchoReq(),
+                        echoResponseProcessor);
             }
-        };
+        }
+    };
+
+    public AsyncRequestImplWithData<Void> startParReq() {
+        return START_PAR_REQ.create(this);
     }
 }

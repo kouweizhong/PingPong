@@ -17,13 +17,41 @@ package com.blockwithme.pingpong.latency.impl;
 
 import org.agilewiki.jactor2.core.blades.BladeBase;
 import org.agilewiki.jactor2.core.reactors.Reactor;
-import org.agilewiki.jactor2.core.requests.SyncRequest;
+import org.agilewiki.jactor2.core.requests.StaticSOp;
+import org.agilewiki.jactor2.core.requests.impl.RequestImpl;
+import org.agilewiki.jactor2.core.requests.impl.RequestImplWithData;
 
 /**
  * Receives Pings, and send Pongs back.
  * Implemented using async calls in JActor2.
  */
 public class JActor2Ponger extends BladeBase {
+    private static final class PingReq extends
+            StaticSOp<JActor2Ponger, Integer> {
+        private final IntVar input = var(0);
+
+        public PingReq() {
+            super(JActor2Ponger.class);
+        }
+
+        @Override
+        protected Integer processSyncOperation(final JActor2Ponger ponger,
+                final RequestImplWithData<Integer> _requestImpl)
+                throws Exception {
+            ponger.pings++;
+            return input.get(_requestImpl) + 1;
+        }
+
+        /** Creates a ping(int) request to the Ponger. */
+        public RequestImpl<Integer> pingReq(final JActor2Ponger p,
+                final int _input) {
+            /** A Ping request, targeted at Ponger. */
+            return input.set(create(p), _input);
+        }
+    };
+
+    private static final PingReq PING_REQ = new PingReq();
+
     /** Some mutable data of Ponger. */
     private int pings;
 
@@ -33,15 +61,8 @@ public class JActor2Ponger extends BladeBase {
     }
 
     /** Creates a ping(int) request to the Ponger. */
-    public SyncRequest<Integer> pingReq(final int input) {
-        /** A Ping request, targeted at Ponger. */
-        return new SyncBladeRequest<Integer>() {
-            @Override
-            public Integer processSyncRequest() throws Exception {
-                pings++;
-                return input + 1;
-            }
-        };
+    public RequestImpl<Integer> pingReq(final int input) {
+        return PING_REQ.pingReq(this, input);
     }
 
     /** Returns the number of Pings received. */

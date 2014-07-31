@@ -17,8 +17,9 @@ package com.blockwithme.pingpong.throughput.jactor2;
 
 import org.agilewiki.jactor2.core.blades.BladeBase;
 import org.agilewiki.jactor2.core.reactors.Reactor;
-import org.agilewiki.jactor2.core.requests.AsyncRequest;
+import org.agilewiki.jactor2.core.requests.AsyncRequestImplWithData;
 import org.agilewiki.jactor2.core.requests.AsyncResponseProcessor;
+import org.agilewiki.jactor2.core.requests.StaticAOp;
 
 /**
  * @author monster
@@ -26,9 +27,9 @@ import org.agilewiki.jactor2.core.requests.AsyncResponseProcessor;
  */
 public class JActor2Sender extends BladeBase {
 
-    private final JActor2Echo echo;
-    private final int count;
-    private final int burst;
+    final JActor2Echo echo;
+    final int count;
+    final int burst;
 
     /** Constructs a JActor2Echo. */
     public JActor2Sender(final Reactor _reactor, final JActor2Echo _echo,
@@ -40,40 +41,58 @@ public class JActor2Sender extends BladeBase {
     }
 
     /** Creates an start echo request. */
-    public AsyncRequest<Void> startEchoReq() {
-        return new AsyncBladeRequest<Void>() {
-            private final AsyncResponseProcessor<Void> dis = this;
-            private final AsyncResponseProcessor<Void> echoResponseProcessor = new AsyncResponseProcessor<Void>() {
+    private static StaticAOp<JActor2Sender, Void> START_ECHO_REQ = new StaticAOp<JActor2Sender, Void>(
+            JActor2Sender.class) {
+        private final IntVar batches = var(0);
+        private final IntVar replies = var(0);
+
+        private void echo(final JActor2Sender blade,
+                final AsyncRequestImplWithData<Void> r,
+                final AsyncResponseProcessor<Void> echoResponseProcessor)
+                throws Exception {
+            final int burst = blade.burst;
+            final JActor2Echo echo = blade.echo;
+            for (int i = 0; i < burst; i++) {
+                r.send(echo.echoReq(), echoResponseProcessor);
+            }
+            /** Number of batches done. */
+            batches.inc(r);
+        }
+
+        @Override
+        protected void processAsyncOperation(final JActor2Sender blade,
+                final AsyncRequestImplWithData<Void> _asyncRequestImpl,
+                final AsyncResponseProcessor<Void> _asyncResponseProcessor)
+                throws Exception {
+            final int count = blade.count;
+            // TODO Stupid work-around for compiler bug!
+            final AsyncResponseProcessor<Void>[] echoResponseProcessor2 = new AsyncResponseProcessor[1];
+            final AsyncResponseProcessor<Void> echoResponseProcessor = new AsyncResponseProcessor<Void>() {
                 @Override
                 public void processAsyncResponse(final Void response)
                         throws Exception {
-                    replies++;
-                    if (replies == burst) {
-                        replies = 0;
-                        if (batches < count) {
-                            echo();
+                    /** Number of replies in the current batch. */
+                    replies.inc(_asyncRequestImpl);
+                    final int _replies = replies.get(_asyncRequestImpl);
+                    if (_replies == blade.burst) {
+                        replies.set(_asyncRequestImpl, 0);
+                        final int _batches = batches.get(_asyncRequestImpl);
+                        if (_batches < count) {
+                            echo(blade, _asyncRequestImpl,
+                                    echoResponseProcessor2[0]);
                         } else {
-                            dis.processAsyncResponse(response);
+                            _asyncRequestImpl.processAsyncResponse(response);
                         }
                     }
                 }
             };
-            /** Number of batches done. */
-            private int batches = 0;
-            /** Number of replies in the current batch. */
-            private int replies = 0;
+            echoResponseProcessor2[0] = echoResponseProcessor;
+            echo(blade, _asyncRequestImpl, echoResponseProcessor);
+        }
+    };
 
-            private void echo() throws Exception {
-                for (int i = 0; i < burst; i++) {
-                    send(echo.echoReq(), echoResponseProcessor);
-                }
-                batches++;
-            }
-
-            @Override
-            public void processAsyncRequest() throws Exception {
-                echo();
-            }
-        };
+    /** Creates an start echo request. */
+    public AsyncRequestImplWithData<Void> startEchoReq() {
+        return START_ECHO_REQ.create(this);
     }
 }

@@ -17,13 +17,24 @@ package com.blockwithme.pingpong.throughput.jactor2;
 
 import org.agilewiki.jactor2.core.blades.BladeBase;
 import org.agilewiki.jactor2.core.reactors.Reactor;
-import org.agilewiki.jactor2.core.requests.SyncRequest;
+import org.agilewiki.jactor2.core.requests.StaticSOp;
+import org.agilewiki.jactor2.core.requests.impl.RequestImpl;
+import org.agilewiki.jactor2.core.requests.impl.RequestImplWithData;
 
 /**
  * @author monster
  *
  */
 public class JActor2Echo extends BladeBase {
+    /** An echo (null) request. */
+    private static final StaticSOp<JActor2Echo, Void> REQ = new StaticSOp<JActor2Echo, Void>(
+            JActor2Echo.class) {
+        @Override
+        protected Void processSyncOperation(final JActor2Echo blade,
+                final RequestImplWithData<Void> _requestImpl) throws Exception {
+            return null;
+        }
+    };
 
     /** Constructs a JActor2Echo. */
     public JActor2Echo(final Reactor _reactor) throws Exception {
@@ -31,13 +42,7 @@ public class JActor2Echo extends BladeBase {
     }
 
     /** Creates an echo (null) request. */
-    public SyncRequest<Void> echoReq() {
-        /** An echo (null) request. */
-        return new SyncBladeRequest<Void>() {
-            @Override
-            public Void processSyncRequest() throws Exception {
-                return null;
-            }
-        };
+    public RequestImpl<Void> echoReq() {
+        return REQ.create(this);
     }
 }
