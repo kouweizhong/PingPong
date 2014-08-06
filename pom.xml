@@ -12,7 +12,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.blockwithme</groupId>
 	<artifactId>PingPong</artifactId>
-	<version>0.10.0</version>
+	<version>0.11.0</version>
 	<packaging>jar</packaging>
 	<name>PingPong</name>
 	<description>Shows how to implement a simple request-reply example using multiple Java Actor APIs, as a benchmark.</description>
@@ -177,12 +177,12 @@
 		<dependency>
 			<groupId>org.agilewiki.jactor2</groupId>
 			<artifactId>jactor2-core</artifactId>
-			<version>0.10.0</version>
+			<version>0.11.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.agilewiki.jactor2</groupId>
 			<artifactId>jactor2-coreMt</artifactId>
-			<version>0.10.0</version>
+			<version>0.11.0</version>
 		</dependency>
 		<dependency>
     		<groupId>com.typesafe.akka</groupId>
