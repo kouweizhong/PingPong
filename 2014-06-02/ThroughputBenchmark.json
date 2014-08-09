@@ -1,0 +1,20 @@
+{
+"cols": [
+{"label": "method", "type": "string"},
+{"label": "Average time [s]", "type": "number"},
+{"label": "StdDev", "type": "number"},
+{"label": "GC time [s]", "type": "number"},
+{"label": "GC average [s]", "type": "number"},
+{"label": "StdDev", "type": "number"},
+{"label": "GC calls", "type": "number"},
+{"label": "benchmark rounds", "type": "number"},
+{"label": "warmup rounds", "type": "number"},
+{"label": "Total benchmark time", "type": "number"},
+{"label": "Total warmup time", "type": "number"}
+],
+"rows": [
+{"c": [{"v": "testJActorSharedMailbox"}, {"v": 16.06}, {"v": 0.88}, {"v": 0.88}, {"v": 0.0}, {"v": 0.0}, {"v": 493}, {"v": 3}, {"v": 3}, {"v": 48.19}, {"v": 47.02}]},
+{"c": [{"v": "testJActorAsyncMailbox"}, {"v": 66.75}, {"v": 0.17}, {"v": 52.64}, {"v": 0.0}, {"v": 0.0}, {"v": 1210}, {"v": 3}, {"v": 3}, {"v": 200.26}, {"v": 200.4}]},
+{"c": [{"v": "testJActor2NBAsyncMailbox"}, {"v": 212.34}, {"v": 0.64}, {"v": 3.9}, {"v": 0.0}, {"v": 0.0}, {"v": 1416}, {"v": 3}, {"v": 3}, {"v": 637.03}, {"v": 638.59}]},
+{"c": [{"v": "testJActor2NBSharedMailbox"}, {"v": 207.38}, {"v": 0.62}, {"v": 2.82}, {"v": 0.0}, {"v": 0.0}, {"v": 1363}, {"v": 3}, {"v": 3}, {"v": 622.15}, {"v": 618.4}]}
+]}
