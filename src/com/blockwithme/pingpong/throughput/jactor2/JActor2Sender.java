@@ -93,6 +93,9 @@ public class JActor2Sender extends BladeBase {
 
     /** Creates an start echo request. */
     public AsyncRequestImplWithData<Void> startEchoReq() {
-        return START_ECHO_REQ.create(this);
+        final AsyncRequestImplWithData<Void> result = START_ECHO_REQ
+                .create(this);
+        result.setExpectedPendingResponses((int) (burst * 1.3));
+        return result;
     }
 }

@@ -64,6 +64,9 @@ public class JActor2Parallel extends BladeBase {
     };
 
     public AsyncRequestImplWithData<Void> startParReq() {
-        return START_PAR_REQ.create(this);
+        final AsyncRequestImplWithData<Void> result = START_PAR_REQ
+                .create(this);
+        result.setExpectedPendingResponses((int) (senders.length * 1.3));
+        return result;
     }
 }
